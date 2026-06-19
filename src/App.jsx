@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
+import VerifyEmail from './pages/auth/VerifyEmail';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 
 import Dashboard from './pages/dashboard/Dashboard';
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/verify-email/:token" element={<VerifyEmail />} />
         
         {/* Protected Routes Wrapper */}
         <Route element={<ProtectedRoute />}>
