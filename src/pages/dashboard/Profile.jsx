@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useLocation } from 'react-router-dom';
 import { User, Scale, Target, Apple } from 'lucide-react';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { api } from '../../utils/api';
 
 export default function Profile() {
+  const location = useLocation();
+  const needSetup = location.state?.needSetup;
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -97,6 +100,13 @@ export default function Profile() {
         <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500">Profile Settings</h1>
         <p className="mt-2 text-zinc-400">Manage your personal metrics and application preferences.</p>
       </div>
+
+      {needSetup && (
+        <div className="rounded-[1.5rem] bg-amber-500/10 p-5 text-sm text-amber-400 border border-amber-500/20 backdrop-blur-md animate-[fade-in-up_0.4s_ease-out_forwards]">
+          <h4 className="font-bold mb-1">Onboarding Required</h4>
+          Please enter your height, weight, and target weight to complete your profile setup. This initializes your calorie metrics and unlocks your AI meal and workout plan generators!
+        </div>
+      )}
 
       {message && (
         <div className="rounded-md bg-emerald-500/10 p-4 text-sm text-emerald-400 border border-emerald-500/20">

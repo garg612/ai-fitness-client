@@ -37,7 +37,12 @@ export default function Dashboard() {
         setLoading(true);
         setError(null);
         const res = await api.get('/dashboard');
-        setData(res.data.data);
+        const dashData = res.data.data;
+        if (!dashData.profile?.height || !dashData.profile?.weight) {
+          navigate('/profile', { state: { needSetup: true } });
+        } else {
+          setData(dashData);
+        }
       } catch (err) {
         console.error("Dashboard error:", err);
         if (err.response?.status === 404) {
