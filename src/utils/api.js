@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create a centralized Axios instance
 export const api = axios.create({
-  baseURL: 'http://16.171.28.184:3000/api/v1', // Replace with your backend API base URL
+  baseURL: '/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -32,7 +32,7 @@ api.interceptors.response.use(
 
       try {
         // Attempt to hit your refresh token endpoint
-        const { data } = await axios.post('http://localhost:3000/api/v1/auth/refresh-token', {}, {
+        const { data } = await axios.post('/api/v1/auth/refresh-token', {}, {
           withCredentials: true // Assuming refresh token is in an HttpOnly cookie
         });
 

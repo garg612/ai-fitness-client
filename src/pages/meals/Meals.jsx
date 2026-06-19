@@ -1,12 +1,43 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Sparkles, Utensils } from 'lucide-react';
+import { Plus, Sparkles, Utensils, Trash2, Loader2 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
-import {useFitnessStore} from "../../store/useFitnessStore";
-import {Trash2} from "lucide-react";
+import { api } from '../../utils/api';
 
 export default function Meals() {
-  const meals=useFitnessStore((state) => state.meals);
-  const deleteMeal=useFitnessStore((state) => state.deleteMeal);
+  const [meals, setMeals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchMeals = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await api.get('/meals');
+      setMeals(res.data.data || []);
+    } catch (err) {
+      console.error("Failed to load meals:", err);
+      setError(err.response?.data?.message || "Failed to load meals library.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMeals();
+  }, []);
+
+  const handleDeleteMeal = async (mealId) => {
+    if (!window.confirm("Are you sure you want to delete this meal plan?")) return;
+    try {
+      await api.delete(`/meals/${mealId}`);
+      // Remove from local state
+      setMeals(prev => prev.filter(meal => meal._id !== mealId));
+    } catch (err) {
+      console.error("Failed to delete meal:", err);
+      alert("Failed to delete meal. Please try again.");
+    }
+  };
 
   return (
     <div className="space-y-8 animate-[fade-in-up_0.6s_ease-out_forwards]">
@@ -33,49 +64,81 @@ export default function Meals() {
         </div>
       </div>
 
-      {/* Meals Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {meals.map((meal) => (
-          <div key={meal.id} className="group relative rounded-[2rem] border border-zinc-800/60 bg-zinc-900/40 p-6 shadow-xl backdrop-blur-xl transition-all hover:border-teal-500/30 overflow-hidden cursor-pointer hover:-translate-y-1">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/5 rounded-full blur-2xl group-hover:bg-teal-500/10 transition-colors pointer-events-none" />
-            
-            <button onClick={() => deleteMeal(meal.id)} className="absolute top-6 right-6 z-20">
-              <Trash2 className="h-4 w-4 text-zinc-500 hover:text-red-400 transition-colors" />
-            </button>
-            
-            <div className="relative z-10 flex justify-between items-start mb-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-zinc-800/50 group-hover:bg-teal-500/10 group-hover:text-teal-400 transition-colors border border-zinc-700/50">
-                  <Utensils className="h-6 w-6 text-teal-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-zinc-100">{meal.name}</h3>
-                  <span className="text-xs text-zinc-500">{meal.type}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative z-10 grid grid-cols-4 gap-2 text-center bg-zinc-950/50 rounded-xl p-3 border border-zinc-800/50">
-              <div className="flex flex-col items-center justify-center">
-                <p className="text-xs text-zinc-500 mb-1">Cals</p>
-                <p className="font-semibold text-zinc-200">{meal.calories}</p>
-              </div>
-              <div>
-                <p className="text-xs text-zinc-500 mb-1">Pro</p>
-                <p className="font-semibold text-blue-400">{meal.protein}g</p>
-              </div>
-              <div>
-                <p className="text-xs text-zinc-500 mb-1">Carb</p>
-                <p className="font-semibold text-amber-400">{meal.carbs}g</p>
-              </div>
-              <div>
-                <p className="text-xs text-zinc-500 mb-1">Fat</p>
-                <p className="font-semibold text-red-400">{meal.fats}g</p>
-              </div>
-            </div>
+      {loading ? (
+        <div className="flex h-[30vh] flex-col items-center justify-center gap-4">
+          <Loader2 className="h-8 w-8 text-teal-400 animate-spin" />
+          <p className="text-zinc-500">Loading meals...</p>
+        </div>
+      ) : error ? (
+        <div className="text-center py-10">
+          <p className="text-red-400">{error}</p>
+          <Button onClick={fetchMeals} className="mt-4">Retry</Button>
+        </div>
+      ) : meals.length === 0 ? (
+        <div className="text-center py-20 bg-zinc-900/20 border border-zinc-850 rounded-[2rem] backdrop-blur-md">
+          <Utensils className="h-12 w-12 text-zinc-650 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-zinc-300">No meals logged yet</h3>
+          <p className="text-zinc-550 mt-1 mb-6">Create a custom meal or use the AI Routine architect to design a diet plan.</p>
+          <div className="flex gap-4 justify-center">
+            <Link to="/meals/create">
+              <Button size="sm">Add Custom Meal</Button>
+            </Link>
+            <Link to="/meals/generate">
+              <Button size="sm" variant="outline">Generate AI Diet</Button>
+            </Link>
           </div>
-        ))}
-      </div>
+        </div>
+      ) : (
+        /* Meals Grid */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {meals.map((meal) => {
+            const displayType = meal.mealType 
+              ? meal.mealType.charAt(0).toUpperCase() + meal.mealType.slice(1) 
+              : "Full Day";
+
+            return (
+              <div key={meal._id} className="group relative rounded-[2rem] border border-zinc-800/60 bg-zinc-900/40 p-6 shadow-xl backdrop-blur-xl transition-all hover:border-teal-500/30 overflow-hidden cursor-pointer hover:-translate-y-1">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/5 rounded-full blur-2xl group-hover:bg-teal-500/10 transition-colors pointer-events-none" />
+                
+                <button onClick={(e) => { e.stopPropagation(); handleDeleteMeal(meal._id); }} className="absolute top-6 right-6 z-20">
+                  <Trash2 className="h-4 w-4 text-zinc-500 hover:text-red-400 transition-colors" />
+                </button>
+                
+                <div className="relative z-10 flex justify-between items-start mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-xl bg-zinc-800/50 group-hover:bg-teal-500/10 group-hover:text-teal-400 transition-colors border border-zinc-700/50">
+                      <Utensils className="h-6 w-6 text-teal-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-zinc-100">{meal.title}</h3>
+                      <span className="text-xs text-zinc-500">{displayType}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="relative z-10 grid grid-cols-4 gap-2 text-center bg-zinc-950/50 rounded-xl p-3 border border-zinc-800/50">
+                  <div className="flex flex-col items-center justify-center">
+                    <p className="text-xs text-zinc-500 mb-1">Cals</p>
+                    <p className="font-semibold text-zinc-200">{Math.round(meal.totalCalories || meal.calories || 0)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-zinc-500 mb-1">Pro</p>
+                    <p className="font-semibold text-blue-400">{Math.round(meal.protein || 0)}g</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-zinc-500 mb-1">Carb</p>
+                    <p className="font-semibold text-amber-400">{Math.round(meal.carbs || 0)}g</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-zinc-500 mb-1">Fat</p>
+                    <p className="font-semibold text-red-400">{Math.round(meal.fats || 0)}g</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, BrainCircuit, CheckCircle } from 'lucide-react';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
-// import { api } from '../../utils/api'; 
+import { api } from '../../utils/api'; 
 
 // 1. Define the validation schema with password confirmation
 const signupSchema = z.object({
@@ -38,15 +38,12 @@ export default function Signup() {
     try {
       console.log('Submitting signup payload:', data);
       
-      // MOCK API CALL 
-      // await api.post('/auth/signup', {
-      //   fullName: data.fullName,
-      //   email: data.email,
-      //   password: data.password
-      // });
-      
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1000)); 
+      // Real API CALL 
+      await api.post('/auth/signup', {
+        fullName: data.fullName,
+        email: data.email,
+        password: data.password
+      }); 
       
       // Show success state instead of immediately redirecting
       setIsSuccess(true);

@@ -1,4 +1,4 @@
-import { useState  } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
-import { useFitnessStore } from '../../store/useFitnessStore';
+import { api } from '../../utils/api';
 
 const mealSchema = z.object({
   name: z.string().min(2, "Meal name is required"),
@@ -20,7 +20,6 @@ const mealSchema = z.object({
 export default function CreateMeal() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const addMeal = useFitnessStore((state) => state.addMeal);
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(mealSchema),
@@ -29,9 +28,28 @@ export default function CreateMeal() {
 
   const onSubmit = async (data) => {
     setIsLoading(true);
-    addMeal(data);
-    await new Promise(resolve => setTimeout(resolve, 400)); // Simulate network delay
-    navigate('/meals');
+    try {
+      const payload = {
+        title: data.name,
+        mealType: data.type.toLowerCase(),
+        items: [{
+          foodName: data.name,
+          quantity: "1",
+          calories: Number(data.calories),
+          protein: Number(data.protein),
+          carbs: Number(data.carbs),
+          fats: Number(data.fats)
+        }]
+      };
+
+      await api.post('/meals', payload);
+      navigate('/meals');
+    } catch (err) {
+      console.error("Failed to create meal:", err);
+      alert(err.response?.data?.message || "Failed to create meal. Please check details and try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

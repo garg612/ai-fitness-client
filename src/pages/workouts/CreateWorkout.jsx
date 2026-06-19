@@ -1,4 +1,4 @@
-import { useState  } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
+import { api } from '../../utils/api';
 
 const workoutSchema = z.object({
   name: z.string().min(2, "Workout name is required"),
@@ -25,13 +26,29 @@ export default function CreateWorkout() {
 
   const onSubmit = async (data) => {
     setIsLoading(true);
-    console.log("Saving Workout:", data);
-    
-    // MOCK API DELAY
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Go back to workouts library after saving
-    navigate('/workouts');
+    try {
+      const payload = {
+        title: data.name,
+        description: data.type,
+        duration: Number(data.duration),
+        difficulty: "intermediate",
+        exercises: [{
+          exerciseName: data.name,
+          sets: 3,
+          reps: 10,
+          duration: Number(data.duration),
+          caloriesBurned: Number(data.caloriesBurned)
+        }]
+      };
+
+      await api.post('/workouts', payload);
+      navigate('/workouts');
+    } catch (err) {
+      console.error("Failed to save workout:", err);
+      alert(err.response?.data?.message || "Failed to create workout. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

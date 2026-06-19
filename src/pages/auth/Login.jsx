@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, BrainCircuit } from 'lucide-react';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
+import { api } from '../../utils/api';
 
 // 1. Define the validation schema
 const loginSchema = z.object({
@@ -31,10 +32,16 @@ export default function Login() {
     try {
       console.log('Submitting payload:', data);
       
-      // MOCK API CALL - Replace with real call later
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+      // Real API CALL
+      const response = await api.post('/auth/login', {
+        email: data.email,
+        password: data.password
+      });
 
-      localStorage.setItem('accessToken', 'ock-demo-token-123');
+      localStorage.setItem('accessToken', response.data.accessToken);
+      if (response.data.user) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
       
       // Redirect to dashboard on success
       navigate('/dashboard');

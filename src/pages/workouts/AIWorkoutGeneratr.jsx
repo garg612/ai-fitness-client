@@ -2,14 +2,13 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bot, Sparkles, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
-import { useFitnessStore } from '../../store/useFitnessStore';
+import { api } from '../../utils/api';
 
 export default function AIWorkoutGenerator() {
   const navigate = useNavigate();
-  const addWorkout = useFitnessStore((state) => state.addWorkout);
-  
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [error, setError] = useState('');
 
   const steps = [
     "Analyzing your fitness profile...",
@@ -20,26 +19,32 @@ export default function AIWorkoutGenerator() {
 
   const handleGenerate = async () => {
     setIsGenerating(true);
+    setError('');
 
-    // Simulate the AI processing steps
-    for (let i = 0; i < steps.length; i++) {
-      setCurrentStep(i);
-      await new Promise(resolve => setTimeout(resolve, 1200)); 
+    // Start API request in parallel
+    const apiPromise = api.post('/ai/generate');
+
+    try {
+      // Animate steps concurrently with the network request
+      for (let i = 0; i < steps.length; i++) {
+        setCurrentStep(i);
+        await new Promise((resolve, reject) => {
+          const timeout = setTimeout(resolve, 1500);
+          apiPromise.catch(err => {
+            clearTimeout(timeout);
+            reject(err);
+          });
+        });
+      }
+
+      // Wait for the API to completely resolve if it takes longer than the animation
+      await apiPromise;
+      navigate('/workouts');
+    } catch (err) {
+      console.error("AI Workout Generation failed:", err);
+      setIsGenerating(false);
+      setError(err.response?.data?.message || "AI routine generator encountered an error. Please ensure you have completed your Profile and BMI record, then try again.");
     }
-
-    // Mock response from your future AI Backend
-    const aiGeneratedWorkout = {
-      name: "AI Custom: Hypertrophy Upper Body",
-      type: "Strength",
-      duration: 65,
-      caloriesBurned: 520,
-    };
-
-    // Inject into global state
-    addWorkout(aiGeneratedWorkout);
-    
-    // Redirect back to library to see the result
-    navigate('/workouts');
   };
 
   return (
@@ -65,6 +70,12 @@ export default function AIWorkoutGenerator() {
         <p className="relative z-10 text-zinc-400 mb-10 max-w-lg mx-auto text-lg leading-relaxed">
           Let our AI analyze your current stats and build a highly optimized, personalized workout block for your specific goals.
         </p>
+
+        {error && (
+          <div className="relative z-10 mb-8 rounded-xl bg-red-500/10 p-4 text-sm text-red-400 border border-red-500/20 max-w-md mx-auto">
+            {error}
+          </div>
+        )}
 
         {!isGenerating ? (
           <Button size="lg" onClick={handleGenerate} className="relative z-10 gap-3 w-full sm:w-auto px-10 py-6 text-lg rounded-full shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_35px_rgba(16,185,129,0.6)]">
