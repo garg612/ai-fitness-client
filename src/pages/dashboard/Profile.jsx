@@ -18,6 +18,7 @@ export default function Profile() {
     defaultValues: {
       fullName: "",
       age: 20,
+      gender: "male",
       weight: 70,
       targetWeight: 70,
       height: 170,
@@ -36,9 +37,21 @@ export default function Profile() {
           const userStr = localStorage.getItem('user');
           const user = userStr ? JSON.parse(userStr) : {};
 
+          // Calculate age from dob
+          let calculatedAge = 20;
+          if (profile.dob) {
+            calculatedAge = Math.floor(
+              (new Date() - new Date(profile.dob)) / (365.25 * 24 * 60 * 60 * 1000)
+            );
+            if (isNaN(calculatedAge)) {
+              calculatedAge = 20;
+            }
+          }
+
           reset({
             fullName: user.fullName || "User",
-            age: profile.age || 20,
+            age: calculatedAge,
+            gender: profile.gender || "male",
             weight: profile.weight || 70,
             targetWeight: profile.targetWeight || 70,
             height: profile.height || 170,
@@ -56,6 +69,7 @@ export default function Profile() {
           reset({
             fullName: user.fullName || "User",
             age: 20,
+            gender: "male",
             weight: 70,
             targetWeight: 70,
             height: 170,
@@ -76,6 +90,10 @@ export default function Profile() {
     setErrorMessage('');
     
     try {
+      const ageVal = Number(data.age) || 20;
+      const birthYear = new Date().getFullYear() - ageVal;
+      const dobStr = `${birthYear}-01-01`;
+
       const profilePayload = {
         height: Number(data.height),
         weight: Number(data.weight),
@@ -83,6 +101,8 @@ export default function Profile() {
         activityLevel: data.activityLevel,
         goal: data.goal,
         dietPreference: data.dietPreference,
+        gender: data.gender,
+        dob: dobStr,
       };
 
       console.log("Sending profile payload:", profilePayload);
@@ -139,9 +159,18 @@ export default function Profile() {
             <h2 className="text-xl font-bold text-white">Personal Information</h2>
           </div>
           
-          <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8">
             <Input label="Full Name" disabled {...register('fullName')} />
             <Input label="Age" type="number" {...register('age')} />
+            
+            <div className="flex flex-col space-y-1.5 w-full">
+              <label className="text-sm font-medium text-zinc-300">Gender</label>
+              <select className="flex h-11 w-full rounded-xl border border-zinc-800/80 bg-zinc-900/50 backdrop-blur-md px-4 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-300" {...register('gender')}>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
           </div>
         </div>
 
