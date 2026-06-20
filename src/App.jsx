@@ -2,6 +2,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import VerifyEmail from './pages/auth/VerifyEmail';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 
 import Dashboard from './pages/dashboard/Dashboard';
@@ -10,7 +12,9 @@ import CreateMeal from './pages/meals/CreateMeal';
 import Workouts from './pages/workouts/Workouts';
 import CreateWorkout from './pages/workouts/CreateWorkout';
 import AIWorkoutGenerator from './pages/workouts/AIWorkoutGeneratr';
+import WorkoutDetail from './pages/workouts/WorkoutDetail';
 import AIMealGenerator from './pages/meals/AIMealGenerator';
+import MealDetail from './pages/meals/MealDetail';
 import Profile from './pages/dashboard/Profile';
 
 import Landing from './pages/Landing';
@@ -24,6 +28,8 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/verify-email/:token" element={<VerifyEmail />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         
         {/* Protected Routes Wrapper */}
         <Route element={<ProtectedRoute />}>
@@ -35,14 +41,14 @@ export default function App() {
             <Route index element={<Workouts />} />
             <Route path="create" element={<CreateWorkout />} />
             <Route path="generate" element={<AIWorkoutGenerator />} />
-            <Route path=":id" element={<div>Workout Details</div>} />
+            <Route path=":id" element={<WorkoutDetail />} />
           </Route>
 
           <Route path="/meals">
             <Route index element={<Meals />} />
             <Route path="create" element={<CreateMeal />} />
             <Route path="generate" element={<AIMealGenerator />} />
-            <Route path=":id" element={<div>Meal Details</div>} />
+            <Route path=":id" element={<MealDetail />} />
           </Route>
         </Route>
 

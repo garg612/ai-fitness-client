@@ -36,15 +36,19 @@ api.interceptors.response.use(
           withCredentials: true // Assuming refresh token is in an HttpOnly cookie
         });
 
+        // Extract accessToken from response data
+        const accessToken = data.data?.accessToken || data.accessToken;
+        
         // Save the new token
-        localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('accessToken', accessToken);
         
         // Update the header and retry the original request
-        originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
         // If the refresh fails, log the user out
         localStorage.removeItem('accessToken');
+        localStorage.removeItem('user');
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }

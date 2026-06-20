@@ -91,10 +91,11 @@ export default function Dashboard() {
   const fatsTarget = Math.round((calorieTarget * 0.25) / 9);
 
   const caloriesConsumed = data.todayNutrition?.caloriesConsumed || 0;
+  const caloriesBurned = data.todayNutrition?.caloriesBurned || 0;
   const bmiCurrent = data.bmi?.current ? Number(data.bmi.current).toFixed(1) : "N/A";
   const bmiCategory = data.bmi?.category || "Not Calculated";
 
-  // Get list of meals
+  const mealDay = data.todaysMeal?.day || data.greeting?.today;
   const mealPlanMeals = data.todaysMeal?.meals || [];
 
   return (
@@ -163,12 +164,29 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Burn/Intake Summary */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="rounded-[2rem] border border-zinc-800/60 bg-zinc-900/40 p-6 shadow-xl backdrop-blur-xl">
+          <p className="text-zinc-400 text-sm uppercase tracking-wider font-medium">Calories Consumed Today</p>
+          <div className="mt-3 text-4xl font-bold text-white">{Math.round(caloriesConsumed)} kcal</div>
+          <p className="mt-2 text-zinc-500 text-sm">Meals logged: {data.todayNutrition?.mealsLogged || 0}</p>
+        </div>
+        <div className="rounded-[2rem] border border-zinc-800/60 bg-zinc-900/40 p-6 shadow-xl backdrop-blur-xl">
+          <p className="text-zinc-400 text-sm uppercase tracking-wider font-medium">Calories Burned Today</p>
+          <div className="mt-3 text-4xl font-bold text-white">{Math.round(caloriesBurned)} kcal</div>
+          <p className="mt-2 text-zinc-500 text-sm">Workout logs: {data.todayNutrition?.workoutsLogged || 0}</p>
+        </div>
+      </div>
+
       {/* Today's Plan Grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Meals List */}
         <div className="rounded-[2rem] border border-zinc-800/60 bg-zinc-900/40 p-8 shadow-xl backdrop-blur-xl">
           <div className="flex items-center justify-between mb-6 border-b border-zinc-800/50 pb-4">
-            <h3 className="text-xl font-bold text-zinc-100">Today's Meal Plan</h3>
+            <div>
+              <h3 className="text-xl font-bold text-zinc-100">Today's Meal Plan</h3>
+              <p className="text-sm text-zinc-500 mt-1">You are at this day: {mealDay}</p>
+            </div>
             <Link to="/meals" className="text-sm font-medium text-teal-400 hover:text-teal-300 transition-colors">
               View All
             </Link>
@@ -178,11 +196,11 @@ export default function Dashboard() {
               mealPlanMeals.map((meal, index) => (
                 <div key={index} className="group flex items-center justify-between rounded-xl bg-zinc-800/20 p-4 border border-zinc-800/50 hover:bg-zinc-800/40 hover:border-teal-500/30 transition-all duration-300">
                   <div>
-                    <p className="font-semibold text-zinc-200 group-hover:text-teal-400 transition-colors">{meal.title || meal.name}</p>
-                    <p className="text-xs text-zinc-400 mt-1">{meal.protein || 0}g Protein • {meal.mealType || "Meal"}</p>
+                    <p className="font-semibold text-zinc-200 group-hover:text-teal-400 transition-colors">{meal.mealName || meal.title || meal.name || `Meal ${index + 1}`}</p>
+                    <p className="text-xs text-zinc-400 mt-1">{meal.mealType || "Meal"} • {meal.protein || 0}g Protein</p>
                   </div>
                   <div className="text-right font-bold text-white bg-zinc-950/50 px-3 py-1.5 rounded-lg border border-zinc-800">
-                    {meal.calories} kcal
+                    {Math.round(meal.calories || 0)} kcal
                   </div>
                 </div>
               ))

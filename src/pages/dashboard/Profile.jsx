@@ -106,7 +106,7 @@ export default function Profile() {
       };
 
       console.log("Sending profile payload:", profilePayload);
-      await api.patch('/profile', profilePayload);
+      await api.patch('/profile/update', profilePayload);
       setMessage('Profile updated successfully!');
       
       // Redirect to dashboard on success

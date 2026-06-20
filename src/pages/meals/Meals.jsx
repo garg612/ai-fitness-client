@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Sparkles, Utensils, Trash2, Loader2 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { api } from '../../utils/api';
 
 export default function Meals() {
+  const navigate = useNavigate();
   const [meals, setMeals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -97,7 +98,18 @@ export default function Meals() {
               : "Full Day";
 
             return (
-              <div key={meal._id} className="group relative rounded-[2rem] border border-zinc-800/60 bg-zinc-900/40 p-6 shadow-xl backdrop-blur-xl transition-all hover:border-teal-500/30 overflow-hidden cursor-pointer hover:-translate-y-1">
+              <div
+                key={meal._id}
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate(`/meals/${meal._id}`)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    navigate(`/meals/${meal._id}`);
+                  }
+                }}
+                className="group relative rounded-[2rem] border border-zinc-800/60 bg-zinc-900/40 p-6 shadow-xl backdrop-blur-xl transition-all hover:border-teal-500/30 overflow-hidden cursor-pointer hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-teal-500/40"
+              >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/5 rounded-full blur-2xl group-hover:bg-teal-500/10 transition-colors pointer-events-none" />
                 
                 <button onClick={(e) => { e.stopPropagation(); handleDeleteMeal(meal._id); }} className="absolute top-6 right-6 z-20">

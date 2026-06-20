@@ -40,9 +40,9 @@ export default function Login() {
         password: data.password
       });
 
-      localStorage.setItem('accessToken', response.data.accessToken);
-      if (response.data.user) {
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem('accessToken', response.data.data.accessToken);
+      if (response.data.data.user) {
+        localStorage.setItem('user', JSON.stringify(response.data.data.user));
       }
       
       // Redirect to dashboard on success
