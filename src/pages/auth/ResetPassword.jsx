@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, BrainCircuit, CheckCircle, XCircle } from 'lucide-react';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
@@ -18,7 +18,9 @@ const resetPasswordSchema = z.object({
 });
 
 export default function ResetPassword() {
-  const { token } = useParams();
+  const { token: paramToken } = useParams();
+  const [searchParams] = useSearchParams();
+  const token = paramToken || searchParams.get('token');
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState('');
