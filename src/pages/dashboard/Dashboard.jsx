@@ -95,6 +95,7 @@ export default function Dashboard() {
   const carbsConsumed = data.todayNutrition?.macros?.carbs || 0;
   const fatsConsumed = data.todayNutrition?.macros?.fats || 0;
   const caloriesBurned = data.todayNutrition?.caloriesBurned || 0;
+  const workoutDuration = data.todayNutrition?.workoutDuration || 0;
   const bmiCurrent = data.bmi?.current ? Number(data.bmi.current).toFixed(1) : "N/A";
   const bmiCategory = data.bmi?.category || "Not Calculated";
 
@@ -601,48 +602,164 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Workout Info */}
-        <div className="relative rounded-[2rem] border border-zinc-800/60 bg-zinc-900/40 p-8 flex flex-col items-center justify-center text-center shadow-xl backdrop-blur-xl overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+        {/* Workout Info Card with Concentric Activity Rings */}
+        <div className="group relative rounded-[2rem] border border-zinc-800/60 bg-zinc-900/40 p-8 shadow-xl backdrop-blur-xl transition-all hover:border-emerald-500/30 overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl group-hover:bg-emerald-500/10 transition-colors pointer-events-none" />
           
-          {data.todaysWorkout ? (
-            <div className="w-full h-full flex flex-col items-center justify-center">
-              <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4">
-                <Dumbbell className="h-8 w-8 text-emerald-400" />
+          <div className="relative z-10 flex items-center justify-between mb-6 border-b border-zinc-800/50 pb-4">
+            <h3 className="text-xl font-bold text-white">Workout Rings</h3>
+            {data.todaysWorkout && (
+              <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border ${
+                data.todaysWorkout.isRestDay 
+                  ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' 
+                  : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+              }`}>
+                {data.todaysWorkout.isRestDay ? "Rest Day" : "Active Day"}
+              </span>
+            )}
+          </div>
+
+          <div className="relative z-10 flex flex-col lg:flex-row items-center gap-6 lg:gap-8 py-2">
+            {/* Concentric Rings Visualizer */}
+            <div className="flex justify-center items-center shrink-0">
+              <svg viewBox="0 0 200 200" className="w-36 h-36 md:w-40 md:h-40 overflow-visible drop-shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+                <defs>
+                  <linearGradient id="ringBurnGradient" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="0%" stopColor="#ff4500" />
+                    <stop offset="100%" stopColor="#ffaa00" />
+                  </linearGradient>
+                  <linearGradient id="ringDurGradient" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="0%" stopColor="#00e676" />
+                    <stop offset="100%" stopColor="#b2ff59" />
+                  </linearGradient>
+                  <linearGradient id="ringConstGradient" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="0%" stopColor="#00e5ff" />
+                    <stop offset="100%" stopColor="#0088ff" />
+                  </linearGradient>
+                </defs>
+
+                {/* Calories Burned Ring (Outer) */}
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="80"
+                  fill="none"
+                  stroke="#ff4500"
+                  strokeWidth="14"
+                  opacity="0.12"
+                />
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="80"
+                  fill="none"
+                  stroke="url(#ringBurnGradient)"
+                  strokeWidth="14"
+                  strokeDasharray="502.65"
+                  strokeDashoffset={502.65 - (Math.min(caloriesBurned / 300, 1)) * 502.65}
+                  strokeLinecap="round"
+                  transform="rotate(-90 100 100)"
+                  className="transition-all duration-1000 ease-out"
+                />
+
+                {/* Training Duration Ring (Middle) */}
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="62"
+                  fill="none"
+                  stroke="#00e676"
+                  strokeWidth="14"
+                  opacity="0.12"
+                />
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="62"
+                  fill="none"
+                  stroke="url(#ringDurGradient)"
+                  strokeWidth="14"
+                  strokeDasharray="389.56"
+                  strokeDashoffset={389.56 - (Math.min(workoutDuration / 45, 1)) * 389.56}
+                  strokeLinecap="round"
+                  transform="rotate(-90 100 100)"
+                  className="transition-all duration-1000 ease-out"
+                />
+
+                {/* Consistency Ring (Inner) */}
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="44"
+                  fill="none"
+                  stroke="#00e5ff"
+                  strokeWidth="14"
+                  opacity="0.12"
+                />
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="44"
+                  fill="none"
+                  stroke="url(#ringConstGradient)"
+                  strokeWidth="14"
+                  strokeDasharray="276.46"
+                  strokeDashoffset={276.46 - (Math.min((data.workoutConsistency?.percentage || 0) / 100, 1)) * 276.46}
+                  strokeLinecap="round"
+                  transform="rotate(-90 100 100)"
+                  className="transition-all duration-1000 ease-out"
+                />
+              </svg>
+            </div>
+
+            {/* Detailed metrics & actions */}
+            <div className="flex-1 w-full flex flex-col justify-between h-full gap-4">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#ff4500]" />
+                  <span className="text-zinc-400 text-xs font-semibold">Active Burn: <strong className="text-zinc-200">{Math.round(caloriesBurned)} / 300 kcal</strong></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#00e676]" />
+                  <span className="text-zinc-400 text-xs font-semibold">Time: <strong className="text-zinc-200">{Math.round(workoutDuration)} / 45 mins</strong></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#00e5ff]" />
+                  <span className="text-zinc-400 text-xs font-semibold">Consistency: <strong className="text-zinc-200">{data.workoutConsistency?.completedThisWeek || 0} / {data.workoutConsistency?.totalThisWeek || 0} days</strong></span>
+                </div>
               </div>
-              <h3 className="text-2xl font-bold text-zinc-100">
-                {data.todaysWorkout.isRestDay ? "Rest Day" : data.todaysWorkout.focus || "Today's Workout"}
-              </h3>
-              <p className="text-zinc-400 mt-2 mb-6">
-                {data.todaysWorkout.isRestDay 
-                  ? "Take some time to recover and recharge." 
-                  : `${data.todaysWorkout.exercises?.length || 0} exercises planned for today.`}
-              </p>
-              
-              {!data.todaysWorkout.isRestDay && (
-                <div className="flex gap-4">
-                  <Link to="/workouts">
-                    <button className="px-6 py-2 bg-emerald-500 text-zinc-950 rounded-full text-sm font-bold hover:bg-emerald-400 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-                      Start Workout
+
+              {data.todaysWorkout ? (
+                <div className="pt-2 border-t border-zinc-850">
+                  <p className="text-sm font-bold text-zinc-100">
+                    Focus: <span className="text-emerald-400">{data.todaysWorkout.isRestDay ? "Rest & Recover" : data.todaysWorkout.focus}</span>
+                  </p>
+                  <p className="text-xs text-zinc-550 mt-1">
+                    {data.todaysWorkout.isRestDay 
+                      ? "Rest is key for muscle recovery." 
+                      : `${data.todaysWorkout.exercises?.length || 0} custom movements planned.`}
+                  </p>
+
+                  {!data.todaysWorkout.isRestDay && (
+                    <Link to="/workouts" className="block mt-4">
+                      <button className="w-full py-2.5 bg-emerald-500 text-zinc-950 rounded-xl text-xs font-bold hover:bg-emerald-400 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.25)]">
+                        Start Workout
+                      </button>
+                    </Link>
+                  )}
+                </div>
+              ) : (
+                <div className="pt-2 border-t border-zinc-850 text-left">
+                  <p className="text-xs text-zinc-500 font-medium">No workout plan loaded for today.</p>
+                  <Link to="/workouts/generate" className="block mt-3">
+                    <button className="w-full py-2.5 bg-emerald-500 text-zinc-950 rounded-xl text-xs font-bold hover:bg-emerald-400 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.25)]">
+                      Generate AI Plan
                     </button>
                   </Link>
                 </div>
               )}
             </div>
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center">
-              <div className="w-20 h-20 rounded-full bg-zinc-800/50 border border-zinc-700/50 flex items-center justify-center mb-6 shadow-inner">
-                <Dumbbell className="h-10 w-10 text-zinc-500 group-hover:text-emerald-400 transition-colors duration-300" />
-              </div>
-              <h3 className="text-2xl font-bold text-zinc-100">No workout plan loaded</h3>
-              <p className="text-zinc-400 mt-2 mb-8 max-w-xs">Ready to crush your goals today? Let's design a training block.</p>
-              <Link to="/workouts/generate">
-                <button className="relative px-8 py-3 bg-emerald-500 text-zinc-950 rounded-full text-sm font-bold hover:bg-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.5)] transition-all duration-300">
-                  Generate AI Workout
-                </button>
-              </Link>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
