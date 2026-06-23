@@ -86,9 +86,9 @@ export default function Dashboard() {
 
   // Calculate dynamic macro targets based on daily calorie target
   const calorieTarget = data.todayNutrition?.dailyTarget || 2000;
-  const proteinTarget = Math.round((calorieTarget * 0.30) / 4);
-  const carbsTarget = Math.round((calorieTarget * 0.45) / 4);
-  const fatsTarget = Math.round((calorieTarget * 0.25) / 9);
+  const proteinTarget = data.todayNutrition?.targetProtein || Math.round((calorieTarget * 0.30) / 4);
+  const carbsTarget = data.todayNutrition?.targetCarbs || Math.round((calorieTarget * 0.45) / 4);
+  const fatsTarget = data.todayNutrition?.targetFats || Math.round((calorieTarget * 0.25) / 9);
 
   const caloriesConsumed = data.todayNutrition?.caloriesConsumed || 0;
   const proteinConsumed = data.todayNutrition?.macros?.protein || 0;
@@ -244,75 +244,103 @@ export default function Dashboard() {
                     <stop offset="0%" stopColor="#00f2fe" />
                     <stop offset="100%" stopColor="#4facfe" />
                   </linearGradient>
+                  <linearGradient id="ringFatsGradient" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="0%" stopColor="#bf5af2" />
+                    <stop offset="100%" stopColor="#8e2de2" />
+                  </linearGradient>
                 </defs>
 
                 {/* Calories Ring (Outer) */}
                 <circle
                   cx="100"
                   cy="100"
-                  r="80"
+                  r="85"
                   fill="none"
                   stroke="#ff0055"
-                  strokeWidth="14"
+                  strokeWidth="10"
                   opacity="0.12"
                 />
                 <circle
                   cx="100"
                   cy="100"
-                  r="80"
+                  r="85"
                   fill="none"
                   stroke="url(#ringCalGradient)"
-                  strokeWidth="14"
-                  strokeDasharray="502.65"
-                  strokeDashoffset={502.65 - (Math.min(caloriesConsumed / (calorieTarget || 1), 1)) * 502.65}
+                  strokeWidth="10"
+                  strokeDasharray="534.07"
+                  strokeDashoffset={534.07 - (Math.min(caloriesConsumed / (calorieTarget || 1), 1)) * 534.07}
                   strokeLinecap="round"
                   transform="rotate(-90 100 100)"
                   className="transition-all duration-1000 ease-out"
                 />
 
-                {/* Protein Ring (Middle) */}
+                {/* Protein Ring (Middle-Outer) */}
                 <circle
                   cx="100"
                   cy="100"
-                  r="62"
+                  r="71"
                   fill="none"
                   stroke="#a3ff00"
-                  strokeWidth="14"
+                  strokeWidth="10"
                   opacity="0.12"
                 />
                 <circle
                   cx="100"
                   cy="100"
-                  r="62"
+                  r="71"
                   fill="none"
                   stroke="url(#ringProtGradient)"
-                  strokeWidth="14"
-                  strokeDasharray="389.56"
-                  strokeDashoffset={389.56 - (Math.min(proteinConsumed / (proteinTarget || 1), 1)) * 389.56}
+                  strokeWidth="10"
+                  strokeDasharray="446.11"
+                  strokeDashoffset={446.11 - (Math.min(proteinConsumed / (proteinTarget || 1), 1)) * 446.11}
                   strokeLinecap="round"
                   transform="rotate(-90 100 100)"
                   className="transition-all duration-1000 ease-out"
                 />
 
-                {/* Carbs Ring (Inner) */}
+                {/* Carbs Ring (Middle-Inner) */}
                 <circle
                   cx="100"
                   cy="100"
-                  r="44"
+                  r="57"
                   fill="none"
                   stroke="#00f2fe"
-                  strokeWidth="14"
+                  strokeWidth="10"
                   opacity="0.12"
                 />
                 <circle
                   cx="100"
                   cy="100"
-                  r="44"
+                  r="57"
                   fill="none"
                   stroke="url(#ringCarbGradient)"
-                  strokeWidth="14"
-                  strokeDasharray="276.46"
-                  strokeDashoffset={276.46 - (Math.min(carbsConsumed / (carbsTarget || 1), 1)) * 276.46}
+                  strokeWidth="10"
+                  strokeDasharray="358.14"
+                  strokeDashoffset={358.14 - (Math.min(carbsConsumed / (carbsTarget || 1), 1)) * 358.14}
+                  strokeLinecap="round"
+                  transform="rotate(-90 100 100)"
+                  className="transition-all duration-1000 ease-out"
+                />
+
+                {/* Fats Ring (Inner) */}
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="43"
+                  fill="none"
+                  stroke="#bf5af2"
+                  strokeWidth="10"
+                  opacity="0.12"
+                />
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="43"
+                  fill="none"
+                  stroke="url(#ringFatsGradient)"
+                  strokeWidth="10"
+                  strokeDasharray="270.18"
+                  strokeDashoffset={270.18 - (Math.min(fatsConsumed / (fatsTarget || 1), 1)) * 270.18}
                   strokeLinecap="round"
                   transform="rotate(-90 100 100)"
                   className="transition-all duration-1000 ease-out"
