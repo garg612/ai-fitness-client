@@ -1,22 +1,11 @@
-import axios from 'axios';
+import axios from "axios";
 
-// Determine API base URL.
-// In dev we use the local proxy path.
-// In Vercel production we use the relative `/api/v1` path with a vercel.json rewrite to the backend.
-// If VITE_API_BASE_URL is set to an insecure http:// URL, we ignore it on HTTPS pages.
-const envBase = import.meta.env.VITE_API_BASE_URL;
-const isSecureBrowser = typeof window !== 'undefined' && window.location.protocol === 'https:';
-const apiBaseUrl = envBase && envBase !== '' && !(isSecureBrowser && envBase.startsWith('http://'))
-  ? envBase
-  : '/api/v1';
-
-// Create a centralized Axios instance
 export const api = axios.create({
-  baseURL: apiBaseUrl,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true,
+    baseURL: import.meta.env.VITE_API_BASE_URL,
+    withCredentials: true,
+    headers:{
+        "Content-Type":"application/json"
+    }
 });
 
 // Request Interceptor: Attach the access token
