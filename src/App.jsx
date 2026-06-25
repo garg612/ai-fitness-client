@@ -28,9 +28,15 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/verify-email/:token" element={<VerifyEmail />} />
+        <Route path="/verify email/:token" element={<VerifyEmail />} />
+        <Route path="/verify%20email/:token" element={<VerifyEmail />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/reset password/:token" element={<ResetPassword />} />
+        <Route path="/reset password" element={<ResetPassword />} />
+        <Route path="/reset%20password/:token" element={<ResetPassword />} />
+        <Route path="/reset%20password" element={<ResetPassword />} />
         
         {/* Protected Routes Wrapper */}
         <Route element={<ProtectedRoute />}>
