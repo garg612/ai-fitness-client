@@ -38,6 +38,9 @@ export default function Dashboard() {
   const [customAmount, setCustomAmount] = useState('');
   const [loggingWater, setLoggingWater] = useState(false);
   const [weightTimeframe, setWeightTimeframe] = useState('weekly'); // 'weekly' or 'monthly'
+  const [showWeightLogger, setShowWeightLogger] = useState(false);
+  const [newWeight, setNewWeight] = useState('');
+  const [loggingWeight, setLoggingWeight] = useState(false);
 
   useEffect(() => {
     const fetchDashboard = async () => {
@@ -178,6 +181,55 @@ export default function Dashboard() {
       setIsEditingGoal(false);
     } catch (err) {
       console.error("Failed to update water goal:", err);
+    }
+  };
+
+  const handleLogWeight = async (e) => {
+    e.preventDefault();
+    const weightVal = Number(newWeight);
+    if (!weightVal || weightVal <= 0 || isNaN(weightVal)) return;
+
+    setLoggingWeight(true);
+    try {
+      const heightVal = data.profile?.height || data.bmi?.height || 170;
+      const res = await api.post('/bmi', { weight: weightVal, height: heightVal });
+      const newRecord = res.data.data;
+      
+      setData(prev => {
+        const trendArr = prev.bmi?.trend || [];
+        const nextTrend = [...trendArr, newRecord];
+        
+        let nextGoalProgress = prev.goalProgress;
+        if (nextGoalProgress) {
+          const totalToLose = Math.abs(nextGoalProgress.startWeight - nextGoalProgress.targetWeight);
+          const lost = Math.abs(nextGoalProgress.startWeight - weightVal);
+          const percentage = totalToLose > 0 ? Math.min(Math.round((lost / totalToLose) * 100), 100) : 0;
+          nextGoalProgress = {
+            ...nextGoalProgress,
+            currentWeight: weightVal,
+            progressPercentage: percentage
+          };
+        }
+        
+        return {
+          ...prev,
+          bmi: {
+            ...prev.bmi,
+            current: newRecord.bmi,
+            category: newRecord.category,
+            weight: weightVal,
+            trend: nextTrend
+          },
+          goalProgress: nextGoalProgress
+        };
+      });
+      setNewWeight('');
+      setShowWeightLogger(false);
+    } catch (err) {
+      console.error("Failed to log weight:", err);
+      alert(err.response?.data?.message || "Failed to log weight");
+    } finally {
+      setLoggingWeight(false);
     }
   };
 
@@ -519,7 +571,7 @@ export default function Dashboard() {
               <h2 className="text-xl font-bold text-white">Weight Progress Tracker</h2>
               <p className="text-sm text-zinc-400 mt-1">Real-time analysis of your weight trends based on your fitness goals.</p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
               {/* Timeframe Switcher */}
               <div className="inline-flex rounded-xl bg-white/5 p-1 border border-white/5 shrink-0">
                 <button
@@ -543,6 +595,42 @@ export default function Dashboard() {
                   Monthly
                 </button>
               </div>
+
+              {/* Log Weight Toggle/Form */}
+              {showWeightLogger ? (
+                <form onSubmit={handleLogWeight} className="inline-flex items-center gap-1.5 bg-white/5 p-1 rounded-xl border border-white/5">
+                  <input
+                    type="number"
+                    step="0.1"
+                    placeholder="Weight (kg)"
+                    value={newWeight}
+                    onChange={(e) => setNewWeight(e.target.value)}
+                    className="w-24 bg-black border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-white"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    disabled={loggingWeight || !newWeight}
+                    className="px-3 py-1 bg-emerald-500 text-black font-bold text-xs rounded-lg hover:bg-emerald-400 transition-colors disabled:opacity-50 shrink-0 cursor-pointer"
+                  >
+                    {loggingWeight ? "..." : "Log"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowWeightLogger(false)}
+                    className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/5 text-zinc-300 hover:bg-white/10 transition-colors text-xs font-semibold shrink-0 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                </form>
+              ) : (
+                <button
+                  onClick={() => setShowWeightLogger(true)}
+                  className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-zinc-300 hover:text-white transition-all text-xs font-semibold cursor-pointer"
+                >
+                  Log Weight
+                </button>
+              )}
               
               {renderAnalysis() && (
                 <span className={`inline-flex items-center rounded-full px-3.5 py-1 text-xs font-bold border transition-all duration-300 ${renderAnalysis().statusColorClass}`}>
