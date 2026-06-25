@@ -46,7 +46,7 @@ export default function Workouts() {
       <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
         <div className="absolute -top-10 -left-10 w-48 h-48 bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none" />
         <div className="relative z-10">
-          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500">Workouts Library</h1>
+          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400">Workouts Library</h1>
           <p className="mt-2 text-zinc-400">Manage your training splits and routines.</p>
         </div>
         <div className="relative z-10 flex gap-4 w-full sm:w-auto">
@@ -76,10 +76,10 @@ export default function Workouts() {
           <Button onClick={fetchWorkouts} className="mt-4">Retry</Button>
         </div>
       ) : workouts.length === 0 ? (
-        <div className="text-center py-20 bg-zinc-900/20 border border-zinc-850 rounded-[2rem] backdrop-blur-md">
-          <Dumbbell className="h-12 w-12 text-zinc-650 mx-auto mb-4" />
+        <div className="text-center py-20 bg-white/[0.02] border border-white/5 rounded-[2rem] backdrop-blur-2xl">
+          <Dumbbell className="h-12 w-12 text-zinc-500 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-zinc-300">No workouts logged yet</h3>
-          <p className="text-zinc-550 mt-1 mb-6">Create a custom workout or let the AI Architect generate a personalized weekly split.</p>
+          <p className="text-zinc-400 mt-1 mb-6">Create a custom workout or let the AI Architect generate a personalized weekly split.</p>
           <div className="flex gap-4 justify-center">
             <Link to="/workouts/create">
               <Button size="sm">Create Custom Workout</Button>
@@ -107,33 +107,33 @@ export default function Workouts() {
                     navigate(`/workouts/${workout._id}`);
                   }
                 }}
-                className="group relative rounded-[2rem] border border-zinc-800/60 bg-zinc-900/40 p-6 shadow-xl backdrop-blur-xl transition-all hover:border-emerald-500/30 overflow-hidden cursor-pointer hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+                className="group relative rounded-[2rem] border border-white/5 bg-white/[0.02] p-6 shadow-2xl backdrop-blur-2xl transition-all hover:bg-white/[0.04] hover:border-white/10 overflow-hidden cursor-pointer hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors pointer-events-none" />
                 
                 <button onClick={(e) => { e.stopPropagation(); handleDeleteWorkout(workout._id); }} className="absolute top-6 right-6 z-20">
                   <Trash2 className="h-4 w-4 text-zinc-500 hover:text-red-400 transition-colors" />
                 </button>
-
+ 
                 <div className="relative z-10 flex justify-between items-start mb-6">
                   <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-zinc-800/50 group-hover:bg-emerald-500/10 group-hover:text-emerald-400 transition-colors border border-zinc-700/50">
+                    <div className="p-3 rounded-xl bg-white/5 group-hover:bg-emerald-500/10 group-hover:text-emerald-400 transition-colors border border-white/5">
                       <Dumbbell className="h-6 w-6 text-emerald-400" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-zinc-100">{workout.title}</h3>
+                      <h3 className="font-semibold text-zinc-150">{workout.title}</h3>
                       <span className="text-xs text-emerald-500">{displayType}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="relative z-10 grid grid-cols-3 gap-2 text-center bg-zinc-950/50 rounded-xl p-3 border border-zinc-800/50">
+                <div className="relative z-10 grid grid-cols-3 gap-2 text-center bg-black/40 rounded-xl p-3 border border-white/5">
                   <div className="flex flex-col items-center">
-                    <Timer className="h-4 w-4 text-emerald-500/70 mb-1" />
+                    <Timer className="h-4 w-4 text-[#00e676] mb-1" />
                     <p className="font-semibold text-zinc-200">{workout.duration}m</p>
                   </div>
-                  <div className="flex flex-col items-center border-l border-r border-zinc-800/50">
-                    <Flame className="h-4 w-4 text-orange-500 mb-1" />
+                  <div className="flex flex-col items-center border-l border-r border-white/5">
+                    <Flame className="h-4 w-4 text-[#ff1358] mb-1" />
                     <p className="font-semibold text-zinc-200">{Math.round(caloriesBurned)}</p>
                   </div>
                   <div className="flex flex-col items-center">

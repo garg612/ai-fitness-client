@@ -187,8 +187,8 @@ export default function Profile() {
   return (
     <div className="max-w-4xl space-y-8 animate-[fade-in-up_0.6s_ease-out_forwards]">
       <div className="relative">
-        <div className="absolute -top-10 -left-10 w-48 h-48 bg-teal-500/10 rounded-full blur-[80px] pointer-events-none" />
-        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500">Profile Settings</h1>
+        <div className="absolute -top-10 -left-10 w-48 h-48 bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none" />
+        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400">Profile Settings</h1>
         <p className="mt-2 text-zinc-400">Manage your personal metrics and application preferences.</p>
       </div>
 
@@ -200,7 +200,7 @@ export default function Profile() {
       )}
 
       {message && (
-        <div className="rounded-md bg-emerald-500/10 p-4 text-sm text-emerald-400 border border-emerald-500/20">
+        <div className="rounded-md bg-white/10 p-4 text-sm text-white border border-white/10">
           {message}
         </div>
       )}
@@ -213,10 +213,10 @@ export default function Profile() {
 
       <form onSubmit={handleSubmit(onSubmit, (err) => console.error("Form validation errors:", err))} className="space-y-8">
         {/* Personal Info Card */}
-        <div className="group relative rounded-[2rem] border border-zinc-800/60 bg-zinc-900/40 p-8 shadow-xl backdrop-blur-xl transition-all hover:border-emerald-500/30 overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl group-hover:bg-emerald-500/10 transition-colors pointer-events-none" />
-          <div className="relative z-10 flex items-center gap-4 mb-8 border-b border-zinc-800/50 pb-4">
-            <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+        <div className="group relative rounded-[2rem] border border-white/5 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-2xl transition-all hover:bg-white/[0.04] hover:border-white/10 overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/[0.01] rounded-full blur-3xl group-hover:bg-emerald-500/[0.03] transition-colors pointer-events-none" />
+          <div className="relative z-10 flex items-center gap-4 mb-8 border-b border-white/5 pb-4">
+            <div className="p-3 bg-white/5 rounded-xl border border-white/5">
               <User className="h-6 w-6 text-emerald-400 shrink-0" />
             </div>
             <h2 className="text-xl font-bold text-white">Personal Information</h2>
@@ -229,7 +229,7 @@ export default function Profile() {
             <div className="flex flex-col space-y-1.5 w-full">
               <label className="text-sm font-medium text-zinc-300">Gender</label>
               <div className="relative">
-                <select className="flex h-11 w-full rounded-xl border border-zinc-800/80 bg-zinc-900/50 backdrop-blur-md px-4 py-2 text-base md:text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-300 appearance-none pr-10" {...register('gender')}>
+                <select className="flex h-11 w-full rounded-xl border border-white/10 bg-black/60 backdrop-blur-md px-4 py-2 text-base md:text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-300 appearance-none pr-10" {...register('gender')}>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
                   <option value="other">Other</option>
@@ -241,11 +241,11 @@ export default function Profile() {
         </div>
 
         {/* Body Metrics Card */}
-        <div className="group relative rounded-[2rem] border border-zinc-800/60 bg-zinc-900/40 p-8 shadow-xl backdrop-blur-xl transition-all hover:border-teal-500/30 overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/5 rounded-full blur-3xl group-hover:bg-teal-500/10 transition-colors pointer-events-none" />
-          <div className="relative z-10 flex items-center gap-4 mb-8 border-b border-zinc-800/50 pb-4">
-            <div className="p-3 bg-teal-500/10 rounded-xl border border-teal-500/20">
-              <Scale className="h-6 w-6 text-teal-400 shrink-0" />
+        <div className="group relative rounded-[2rem] border border-white/5 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-2xl transition-all hover:bg-white/[0.04] hover:border-white/10 overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/[0.01] rounded-full blur-3xl group-hover:bg-emerald-500/[0.03] transition-colors pointer-events-none" />
+          <div className="relative z-10 flex items-center gap-4 mb-8 border-b border-white/5 pb-4">
+            <div className="p-3 bg-white/5 rounded-xl border border-white/5">
+              <Scale className="h-6 w-6 text-emerald-400 shrink-0" />
             </div>
             <h2 className="text-xl font-bold text-white">Body Metrics</h2>
           </div>
@@ -258,10 +258,10 @@ export default function Profile() {
         </div>
 
         {/* Goals & Preferences Card */}
-        <div className="group relative rounded-[2rem] border border-zinc-800/60 bg-zinc-900/40 p-8 shadow-xl backdrop-blur-xl transition-all hover:border-blue-500/30 overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors pointer-events-none" />
-          <div className="relative z-10 flex items-center gap-4 mb-8 border-b border-zinc-800/50 pb-4">
-            <div className="p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
+        <div className="group relative rounded-[2rem] border border-white/5 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-2xl transition-all hover:bg-white/[0.04] hover:border-white/10 overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/[0.01] rounded-full blur-3xl group-hover:bg-blue-500/[0.03] transition-colors pointer-events-none" />
+          <div className="relative z-10 flex items-center gap-4 mb-8 border-b border-white/5 pb-4">
+            <div className="p-3 bg-white/5 rounded-xl border border-white/5">
               <Target className="h-6 w-6 text-blue-400 shrink-0" />
             </div>
             <h2 className="text-xl font-bold text-white">Fitness Goals & Preferences</h2>
@@ -271,7 +271,7 @@ export default function Profile() {
             <div className="flex flex-col space-y-1.5 w-full">
               <label className="text-sm font-medium text-zinc-300">Primary Goal</label>
               <div className="relative">
-                <select className="flex h-11 w-full rounded-xl border border-zinc-800/80 bg-zinc-900/50 backdrop-blur-md px-4 py-2 text-base md:text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-300 appearance-none pr-10" {...register('goal')}>
+                <select className="flex h-11 w-full rounded-xl border border-white/10 bg-black/60 backdrop-blur-md px-4 py-2 text-base md:text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-300 appearance-none pr-10" {...register('goal')}>
                   <option value="weight_loss">Weight Loss</option>
                   <option value="weight_gain">Weight Gain</option>
                   <option value="muscle_building">Muscle Building</option>
@@ -286,7 +286,7 @@ export default function Profile() {
             <div className="flex flex-col space-y-1.5 w-full">
               <label className="text-sm font-medium text-zinc-300">Activity Level</label>
               <div className="relative">
-                <select className="flex h-11 w-full rounded-xl border border-zinc-800/80 bg-zinc-900/50 backdrop-blur-md px-4 py-2 text-base md:text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-300 appearance-none pr-10" {...register('activityLevel')}>
+                <select className="flex h-11 w-full rounded-xl border border-white/10 bg-black/60 backdrop-blur-md px-4 py-2 text-base md:text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-300 appearance-none pr-10" {...register('activityLevel')}>
                   <option value="sedentary">Sedentary</option>
                   <option value="light">Lightly Active</option>
                   <option value="moderate">Moderately Active</option>
@@ -300,7 +300,7 @@ export default function Profile() {
             <div className="flex flex-col space-y-1.5 w-full">
               <label className="text-sm font-medium text-zinc-300">Diet Preference</label>
               <div className="relative">
-                <select className="flex h-11 w-full rounded-xl border border-zinc-800/80 bg-zinc-900/50 backdrop-blur-md px-4 py-2 text-base md:text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-300 appearance-none pr-10" {...register('dietPreference')}>
+                <select className="flex h-11 w-full rounded-xl border border-white/10 bg-black/60 backdrop-blur-md px-4 py-2 text-base md:text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-300 appearance-none pr-10" {...register('dietPreference')}>
                   <option value="Vegetarian">Vegetarian</option>
                   <option value="Non-Vegetarian">Non-Vegetarian</option>
                   <option value="Vegan">Vegan</option>
@@ -311,7 +311,7 @@ export default function Profile() {
             </div>
           </div>
 
-          <div className="mt-8 pt-8 border-t border-zinc-800/50 flex flex-col space-y-3">
+          <div className="mt-8 pt-8 border-t border-white/5 flex flex-col space-y-3">
             <label className="text-sm font-medium text-zinc-350">Experience Level</label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
@@ -339,8 +339,8 @@ export default function Profile() {
                     onClick={() => setValue('experienceLevel', opt.value)}
                     className={`relative flex flex-col items-start p-5 rounded-2xl border text-left transition-all duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/40 ${
                       isSelected
-                        ? 'border-emerald-500 bg-emerald-500/10 text-white shadow-[0_0_15px_rgba(16,185,129,0.15)]'
-                        : 'border-zinc-800 bg-zinc-950/20 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                        ? 'border-emerald-500 bg-emerald-500/10 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]'
+                        : 'border-white/5 bg-white/[0.01] text-zinc-400 hover:border-white/10 hover:text-zinc-200'
                     }`}
                   >
                     {isSelected && (
@@ -367,17 +367,17 @@ export default function Profile() {
       </form>
 
       {/* Password Settings Card */}
-      <form onSubmit={handleChangePassword} className="group relative rounded-[2rem] border border-zinc-800/60 bg-zinc-900/40 p-8 shadow-xl backdrop-blur-xl transition-all hover:border-purple-500/30 overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl group-hover:bg-purple-500/10 transition-colors pointer-events-none" />
-        <div className="relative z-10 flex items-center gap-4 mb-8 border-b border-zinc-800/50 pb-4">
-          <div className="p-3 bg-purple-500/10 rounded-xl border border-purple-500/20">
-            <Key className="h-6 w-6 text-purple-400" />
+      <form onSubmit={handleChangePassword} className="group relative rounded-[2rem] border border-white/5 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-2xl transition-all hover:bg-white/[0.04] hover:border-white/10 overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/[0.01] rounded-full blur-3xl group-hover:bg-purple-500/[0.03] transition-colors pointer-events-none" />
+        <div className="relative z-10 flex items-center gap-4 mb-8 border-b border-white/5 pb-4">
+          <div className="p-3 bg-white/5 rounded-xl border border-white/5">
+            <Key className="h-6 w-6 text-[#b200ff]" />
           </div>
           <h2 className="text-xl font-bold text-white">Password Settings</h2>
         </div>
         
         {passwordMessage && (
-          <div className="rounded-md bg-emerald-500/10 p-4 mb-6 text-sm text-emerald-400 border border-emerald-500/20">
+          <div className="rounded-md bg-white/10 p-4 mb-6 text-sm text-white border border-white/10">
             {passwordMessage}
           </div>
         )}
@@ -416,24 +416,24 @@ export default function Profile() {
         </div>
 
         <div className="flex justify-end pt-2">
-          <Button type="submit" disabled={isChangingPassword} className="px-8 bg-purple-500 hover:bg-purple-600 text-white">
+          <Button type="submit" disabled={isChangingPassword} className="px-8">
             {isChangingPassword ? 'Updating...' : 'Update Password'}
           </Button>
         </div>
       </form>
 
       {/* Danger Zone Card */}
-      <div className="group relative rounded-[2rem] border border-red-500/30 bg-red-950/10 p-8 shadow-xl backdrop-blur-xl transition-all hover:border-red-500/50 overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-red-500/5 rounded-full blur-3xl group-hover:bg-red-500/10 transition-colors pointer-events-none" />
+      <div className="group relative rounded-[2rem] border border-red-500/20 bg-red-950/[0.02] p-8 shadow-2xl backdrop-blur-2xl transition-all hover:border-red-500/40 overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-red-500/[0.01] rounded-full blur-3xl group-hover:bg-red-500/[0.03] transition-colors pointer-events-none" />
         
-        <div className="relative z-10 flex items-center gap-4 mb-8 border-b border-red-500/20 pb-4">
-          <div className="p-3 bg-red-500/20 rounded-xl border border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+        <div className="relative z-10 flex items-center gap-4 mb-8 border-b border-white/5 pb-4">
+          <div className="p-3 bg-red-500/10 rounded-xl border border-red-500/20">
             <Shield className="h-6 w-6 text-red-500" />
           </div>
           <h2 className="text-xl font-bold text-red-400">Danger Zone</h2>
         </div>
         
-        <div className="relative z-10 bg-black/20 rounded-xl border border-red-500/10 p-6">
+        <div className="relative z-10 bg-black/40 rounded-xl border border-white/5 p-6">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="flex-1">
               <h3 className="font-bold text-white text-lg flex items-center gap-2">
