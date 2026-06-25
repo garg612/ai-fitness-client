@@ -1,7 +1,10 @@
 import axios from "axios";
 
+const envBase = import.meta.env.VITE_API_BASE_URL;
+const apiBaseUrl = envBase && envBase !== '' ? envBase : '/api/v1';
+
 export const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
+    baseURL: apiBaseUrl,
     withCredentials: true,
     headers:{
         "Content-Type":"application/json"
@@ -17,9 +20,7 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    if (config) {
-      config.withCredentials = true;
-    }
+    config.withCredentials = true;
     return config;
   },
   (error) => Promise.reject(error)
@@ -39,7 +40,7 @@ api.interceptors.response.use(
 
       try {
         // Attempt to hit your refresh token endpoint directly so we do not recurse through the interceptor
-        const { data } = await axios.post(`${baseURL}/auth/refresh-token`, {}, {
+        const { data } = await axios.post(`${apiBaseUrl}/auth/refresh-token`, {}, {
           withCredentials: true // Assuming refresh token is in an HttpOnly cookie
         });
 
