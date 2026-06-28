@@ -353,7 +353,172 @@ export default function Dashboard() {
         </div>
         <div className="text-right hidden md:block">
           <p className="text-zinc-300 font-semibold">{data.greeting?.today}</p>
-          <p className="text-zinc-500 text-sm">{data.greeting?.date}</p>
+          <p className="text-zinc-550 text-sm">{data.greeting?.date}</p>
+        </div>
+      </div>
+
+      {/* Today's Focus & Targets */}
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Today's Workout Focus */}
+        <div className="rounded-[2rem] border border-white/5 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-2xl transition-all hover:bg-white/[0.04]">
+          <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-emerald-500/10 p-2.5">
+                <Dumbbell className="h-5 w-5 text-emerald-400" />
+              </div>
+              <div>
+                <h3 className="font-bold text-white">Today's Workout</h3>
+                <p className="text-xs text-zinc-500">{data.todaysWorkout?.day || "No plan active"}</p>
+              </div>
+            </div>
+            {data.todaysWorkout?.isCompleted ? (
+              <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full uppercase tracking-wider">
+                Completed ✅
+              </span>
+            ) : data.todaysWorkout?.isRestDay ? (
+              <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full uppercase tracking-wider">
+                Rest Day 🧘
+              </span>
+            ) : (
+              <span className="text-[10px] font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3 py-1 rounded-full uppercase tracking-wider">
+                Pending 🔥
+              </span>
+            )}
+          </div>
+
+          {data.todaysWorkout ? (
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-semibold text-zinc-200">{data.todaysWorkout.focus || "Recovery Focus"}</p>
+                <p className="text-xs text-zinc-500 mt-1">
+                  {data.todaysWorkout.isRestDay 
+                    ? "Time to rest and let muscles recover."
+                    : `${data.todaysWorkout.exercises?.length || 0} planned movements`}
+                </p>
+              </div>
+              
+              {!data.todaysWorkout.isRestDay && data.todaysWorkout.exercises?.length > 0 && (
+                <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1">
+                  {data.todaysWorkout.exercises.slice(0, 3).map((ex, i) => (
+                    <div key={i} className="flex justify-between items-center text-xs bg-white/[0.01] border border-white/5 p-2 rounded-xl">
+                      <span className="font-semibold text-zinc-350">{ex.exerciseName || ex.name}</span>
+                      <span className="text-zinc-500">{ex.sets}x{ex.reps} {ex.weight > 0 ? `• ${ex.weight}kg` : ""}</span>
+                    </div>
+                  ))}
+                  {data.todaysWorkout.exercises.length > 3 && (
+                    <p className="text-[10px] text-zinc-500 text-center">+ {data.todaysWorkout.exercises.length - 3} more exercises</p>
+                  )}
+                </div>
+              )}
+
+              {!data.todaysWorkout.isRestDay && !data.todaysWorkout.isCompleted && (
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={async () => {
+                      try {
+                        await api.post(`/workouts/${data.todaysWorkout.workoutId}/log`, {
+                          duration: 45,
+                          caloriesBurned: 300,
+                        });
+                        alert("Workout logged successfully!");
+                        window.location.reload();
+                      } catch (err) {
+                        alert(err.response?.data?.message || "Failed to log workout");
+                      }
+                    }}
+                    className="flex-1 text-center bg-emerald-500 text-black py-2.5 rounded-xl font-bold text-xs hover:bg-emerald-400 transition-colors shadow-lg hover:shadow-emerald-500/25 cursor-pointer"
+                  >
+                    Quick Log (300 kcal)
+                  </button>
+                  <Link 
+                    to={`/workouts/${data.todaysWorkout.workoutId}`} 
+                    className="flex-1 text-center bg-white/5 border border-white/10 text-zinc-300 py-2.5 rounded-xl font-bold text-xs hover:bg-white/10 transition-colors flex items-center justify-center"
+                  >
+                    View Details
+                  </Link>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-xs text-zinc-500 py-4">No active workout split scheduled for today. Start a template from Workouts!</p>
+          )}
+        </div>
+
+        {/* Today's Meal Plan Focus */}
+        <div className="rounded-[2rem] border border-white/5 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-2xl transition-all hover:bg-white/[0.04]">
+          <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-teal-500/10 p-2.5">
+                <Utensils className="h-5 w-5 text-teal-400" />
+              </div>
+              <div>
+                <h3 className="font-bold text-white">Today's Nutrition Plan</h3>
+                <p className="text-xs text-zinc-500">{data.todaysMeal?.day || "No plan active"}</p>
+              </div>
+            </div>
+            {data.todayNutrition?.mealsLogged >= (data.todaysMeal?.meals?.length || 3) ? (
+              <span className="text-[10px] font-bold text-teal-400 bg-teal-500/10 border border-teal-500/20 px-3 py-1 rounded-full uppercase tracking-wider">
+                Full Plan Logged ✅
+              </span>
+            ) : (
+              <span className="text-[10px] font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3 py-1 rounded-full uppercase tracking-wider">
+                {Math.max(0, (data.todaysMeal?.meals?.length || 0) - (data.todayNutrition?.mealsLogged || 0))} Pending 🍽️
+              </span>
+            )}
+          </div>
+
+          {data.todaysMeal ? (
+            <div className="space-y-4">
+              <div className="flex justify-between text-xs">
+                <span className="text-zinc-400">Dietary Style: <strong className="text-zinc-200 capitalize">{data.todaysMeal.dietPreference}</strong></span>
+                <span className="text-zinc-400">Target: <strong className="text-zinc-200">{data.todaysMeal.dailyCalorieTarget} kcal</strong></span>
+              </div>
+
+              <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1">
+                {(data.todaysMeal.meals || []).map((meal, idx) => {
+                  return (
+                    <div key={idx} className="flex justify-between items-center text-xs bg-white/[0.01] border border-white/5 p-2 rounded-xl">
+                      <div>
+                        <span className="font-bold text-zinc-350 capitalize">{meal.mealType}: </span>
+                        <span className="text-zinc-400">{meal.mealName || meal.name}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-zinc-500 font-medium">{meal.calories} kcal</span>
+                        <button
+                          onClick={async () => {
+                            try {
+                              await api.post(`/meals/${data.todaysMeal.mealPlanId}/consume`, {
+                                day: data.todaysMeal.day,
+                                mealType: meal.mealType
+                              });
+                              alert(`${meal.mealType} logged successfully!`);
+                              window.location.reload();
+                            } catch (err) {
+                              alert(err.response?.data?.message || "Failed to log meal");
+                            }
+                          }}
+                          className="px-2.5 py-1 rounded-lg bg-teal-500 hover:bg-teal-400 text-[10px] font-bold text-black transition-colors cursor-pointer"
+                        >
+                          ✓ Log
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="text-center">
+                <Link 
+                  to={`/meals/${data.todaysMeal.mealPlanId}`} 
+                  className="inline-block text-center w-full bg-white/5 border border-white/10 text-zinc-350 py-2.5 rounded-xl font-bold text-xs hover:bg-white/10 transition-colors"
+                >
+                  View Full Meal Recipes
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-zinc-500 py-4">No active nutrition split scheduled for today. Start a meal template from Meals library!</p>
+          )}
         </div>
       </div>
 
