@@ -90,19 +90,27 @@ export default function WorkoutDetail() {
   if (!workout) return null;
 
   const renderExerciseCard = (exercise, index) => (
-    <div key={index} className="rounded-2xl border border-zinc-800/60 bg-zinc-950/40 p-5">
+    <div key={index} className="rounded-2xl border border-zinc-800/60 bg-zinc-950/40 p-5 space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-lg font-semibold text-zinc-100">{exercise.exerciseName || exercise.name || `Exercise ${index + 1}`}</p>
           <p className="text-sm text-zinc-500">{exercise.focus || exercise.muscleGroup || 'Workout movement'}</p>
         </div>
-        <div className="grid grid-cols-4 gap-4 text-sm text-zinc-300">
-          <span>{exercise.sets || 0} sets</span>
-          <span>{exercise.reps || 0} reps</span>
-          <span>{exercise.restSeconds || 0}s rest</span>
-          <span className="text-orange-400">{exercise.caloriesBurned || 0} kcal</span>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-300">
+          <span className="bg-zinc-800/50 px-2 py-0.5 rounded border border-zinc-700/50">{exercise.sets || 0} sets</span>
+          <span className="bg-zinc-800/50 px-2 py-0.5 rounded border border-zinc-700/50">{exercise.reps || 0} reps</span>
+          {(exercise.weight > 0 || exercise.weights > 0) && (
+            <span className="bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">{exercise.weight || exercise.weights} kg</span>
+          )}
+          <span className="bg-zinc-800/50 px-2 py-0.5 rounded border border-zinc-700/50">{(exercise.restTime || exercise.restSeconds || 0)}s rest</span>
+          <span className="text-orange-400 font-semibold">{exercise.caloriesBurned || 0} kcal</span>
         </div>
       </div>
+      {exercise.notes && (
+        <p className="text-xs text-zinc-400 leading-relaxed border-t border-zinc-800/40 pt-2 italic">
+          💡 Movement Tip: {exercise.notes}
+        </p>
+      )}
     </div>
   );
 

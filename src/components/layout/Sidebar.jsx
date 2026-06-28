@@ -1,5 +1,5 @@
 import { NavLink, useNavigate, Link } from 'react-router-dom';
-import { LayoutDashboard, Dumbbell, Utensils, Settings, LogOut, BrainCircuit } from 'lucide-react';
+import { LayoutDashboard, Dumbbell, Utensils, Settings, LogOut, BrainCircuit, History } from 'lucide-react';
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -7,7 +7,9 @@ export default function Sidebar() {
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Workouts', path: '/workouts', icon: Dumbbell },
+    { name: 'Workout History', path: '/workouts/history', icon: History },
     { name: 'Meals', path: '/meals', icon: Utensils },
+    { name: 'Meal History', path: '/meals/history', icon: History },
   ];
 
   const handleLogout = async () => {

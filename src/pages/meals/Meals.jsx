@@ -49,7 +49,12 @@ export default function Meals() {
           <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400">Meals Library</h1>
           <p className="mt-2 text-zinc-400">Manage your nutrition and custom recipes.</p>
         </div>
-        <div className="relative z-10 flex gap-4 w-full sm:w-auto">
+        <div className="relative z-10 flex gap-3 w-full sm:w-auto flex-wrap">
+          <Link to="/meals/history" className="flex-1 sm:flex-none">
+            <Button variant="outline" className="w-full gap-2 hover:bg-white/5">
+              History
+            </Button>
+          </Link>
           <Link to="/meals/generate" className="flex-1 sm:flex-none">
             <Button variant="outline" className="w-full gap-2">
               <Sparkles className="h-4 w-4 text-emerald-400" />

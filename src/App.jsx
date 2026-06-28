@@ -9,8 +9,10 @@ import ProtectedRoute from './components/layout/ProtectedRoute';
 import Dashboard from './pages/dashboard/Dashboard';
 import Meals from './pages/meals/Meals';
 import CreateMeal from './pages/meals/CreateMeal';
+import MealHistory from './pages/meals/MealHistory';
 import Workouts from './pages/workouts/Workouts';
 import CreateWorkout from './pages/workouts/CreateWorkout';
+import WorkoutHistory from './pages/workouts/WorkoutHistory';
 import AIWorkoutGenerator from './pages/workouts/AIWorkoutGeneratr';
 import WorkoutDetail from './pages/workouts/WorkoutDetail';
 import AIMealGenerator from './pages/meals/AIMealGenerator';
@@ -46,6 +48,7 @@ export default function App() {
           
           <Route path="/workouts">
             <Route index element={<Workouts />} />
+            <Route path="history" element={<WorkoutHistory />} />
             <Route path="create" element={<CreateWorkout />} />
             <Route path="generate" element={<AIWorkoutGenerator />} />
             <Route path=":id" element={<WorkoutDetail />} />
@@ -53,6 +56,7 @@ export default function App() {
 
           <Route path="/meals">
             <Route index element={<Meals />} />
+            <Route path="history" element={<MealHistory />} />
             <Route path="create" element={<CreateMeal />} />
             <Route path="generate" element={<AIMealGenerator />} />
             <Route path=":id" element={<MealDetail />} />

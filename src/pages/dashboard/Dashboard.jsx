@@ -5,7 +5,7 @@ import { api } from '../../utils/api';
 
 // Reusable progress bar component for macros
 const MacroBar = ({ label, current, target, colorClass }) => {
-  const percentage = target > 0 ? Math.min(Math.round((current / target) * 100), 100) : 0;
+  const percentage = target > 0 ? Math.min(Math.round((current / target) * 105), 100) : 0;
   
   return (
     <div className="space-y-2">
@@ -37,6 +37,8 @@ export default function Dashboard() {
   const [tempGoal, setTempGoal] = useState(2000);
   const [customAmount, setCustomAmount] = useState('');
   const [loggingWater, setLoggingWater] = useState(false);
+  
+  // Weight timeframe
   const [weightTimeframe, setWeightTimeframe] = useState('weekly'); // 'weekly' or 'monthly'
   const [showWeightLogger, setShowWeightLogger] = useState(false);
   const [newWeight, setNewWeight] = useState('');
@@ -58,7 +60,6 @@ export default function Dashboard() {
       } catch (err) {
         console.error("Dashboard error:", err);
         if (err.response?.status === 404) {
-          // Profile not found, redirect to profile setup
           navigate('/profile');
         } else {
           setError(err.response?.data?.message || "Failed to load dashboard data.");
@@ -96,7 +97,7 @@ export default function Dashboard() {
 
   if (!data) return null;
 
-  // Calculate dynamic macro targets based on daily calorie target
+  // Destructure metrics
   const calorieTarget = data.todayNutrition?.dailyTarget || 2000;
   const proteinTarget = data.todayNutrition?.targetProtein || Math.round((calorieTarget * 0.30) / 4);
   const carbsTarget = data.todayNutrition?.targetCarbs || Math.round((calorieTarget * 0.45) / 4);
@@ -233,9 +234,6 @@ export default function Dashboard() {
     }
   };
 
-  const mealDay = data.todaysMeal?.day || data.greeting?.today;
-  const mealPlanMeals = data.todaysMeal?.meals || [];
-
   // Goal progress feedback calculations
   const renderAnalysis = () => {
     if (!data.goalProgress) return null;
@@ -255,40 +253,38 @@ export default function Dashboard() {
       if (delta < 0) {
         statusText = 'On Track';
         statusColorClass = 'text-emerald-400 border-emerald-500/20 bg-emerald-500/10';
-        feedback = `Great progress! You have lost ${absDelta} kg since your starting weight of ${startWeight} kg. Your target is ${targetWeight} kg. Keep up the solid consistency!`;
+        feedback = `Great progress! You have lost ${absDelta} kg since your starting weight. Your target is ${targetWeight} kg. Keep up the consistency!`;
       } else if (delta === 0) {
         statusText = 'Starting Line';
         statusColorClass = 'text-blue-400 border-blue-500/20 bg-blue-500/10';
-        feedback = `Your starting weight is set at ${startWeight} kg. Stick to your customized calorie deficit and workout routine to begin your fat loss journey.`;
+        feedback = `Starting weight is set at ${startWeight} kg. Maintain your calorie deficit to begin your fat loss journey.`;
       } else {
         statusText = 'Adjustment Needed';
         statusColorClass = 'text-amber-400 border-amber-500/20 bg-amber-500/10';
-        feedback = `You are currently ${absDelta} kg above your starting weight of ${startWeight} kg. Weight fluctuates easily due to water and glycogen—don't lose heart! Ensure you log all meals to monitor your calorie deficit closely.`;
+        feedback = `Currently ${absDelta} kg above start weight. Weight fluctuates easily due to water and glycogen. Ensure you track calories accurately.`;
       }
-    } else { // Weight gain / muscle building
+    } else {
       if (delta > 0) {
         statusText = 'On Track';
         statusColorClass = 'text-emerald-400 border-emerald-500/20 bg-emerald-500/10';
-        feedback = `Excellent progress! You have successfully gained ${absDelta} kg of mass. Your target weight is ${targetWeight} kg. Keep training heavy and meeting your daily protein targets!`;
+        feedback = `Excellent progress! You have successfully gained ${absDelta} kg. Target is ${targetWeight} kg. Hit protein goals!`;
       } else if (delta === 0) {
         statusText = 'Starting Line';
         statusColorClass = 'text-blue-400 border-blue-500/20 bg-blue-500/10';
-        feedback = `Your starting weight is set at ${startWeight} kg. Focus on hitting a consistent surplus with high-protein meals and progressive overload to build muscle.`;
+        feedback = `Starting weight is set at ${startWeight} kg. Focus on hitting a consistent surplus with progressive overload.`;
       } else {
-        statusText = 'Caloric Adjustment';
+        statusText = 'Caloric surplus needed';
         statusColorClass = 'text-amber-400 border-amber-500/20 bg-amber-500/10';
-        feedback = `You are currently ${absDelta} kg below your starting weight of ${startWeight} kg. To build muscle, you need to eat in a calorie surplus. Check your meal logger and try increasing your daily calorie target.`;
+        feedback = `Currently ${absDelta} kg below start weight. To build muscle, you need to eat in a surplus. Increase your daily meals.`;
       }
     }
     
     return { statusText, statusColorClass, feedback };
   };
 
-  // SVG Chart calculation details
+  // SVG Chart calculation details - Weight trend
   const trend = data.bmi?.trend || [];
   let graphPoints = [];
-  
-  // Slice trend based on timeframe selected
   const activeTrend = weightTimeframe === 'weekly' ? trend.slice(-7) : trend.slice(-30);
   
   if (activeTrend.length > 0) {
@@ -339,9 +335,14 @@ export default function Dashboard() {
     fillD = `${pathD} L ${points[points.length - 1].x} ${svgHeight - paddingY} L ${points[0].x} ${svgHeight - paddingY} Z`;
   }
 
+  // Weekly Charts Calculation
+  const weeklyData = data.weeklyChartsData || [];
+  const maxCals = Math.max(...weeklyData.map(d => Math.max(d.caloriesConsumed, d.caloriesBurned)), 2500);
+  const maxWaterVal = Math.max(...weeklyData.map(d => d.waterIntake), 2500);
+
   return (
     <div className="space-y-8 animate-[fade-in-up_0.6s_ease-out_forwards]">
-      {/* Header */}
+      {/* Greeting Header */}
       <div className="relative flex justify-between items-center">
         <div>
           <div className="absolute -top-10 -left-10 w-48 h-48 bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none" />
@@ -367,7 +368,6 @@ export default function Dashboard() {
           </div>
 
           <div className="relative z-10 flex flex-col lg:flex-row items-center gap-8 lg:gap-12 py-2">
-            {/* Concentric Rings Visualizer */}
             <div className="flex justify-center items-center shrink-0">
               <svg viewBox="0 0 200 200" className="w-40 h-40 md:w-44 md:h-44 overflow-visible drop-shadow-[0_0_20px_rgba(0,0,0,0.5)]">
                 <defs>
@@ -390,15 +390,7 @@ export default function Dashboard() {
                 </defs>
 
                 {/* Calories Ring (Outer) */}
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="85"
-                  fill="none"
-                  stroke="#ff1358"
-                  strokeWidth="10"
-                  opacity="0.08"
-                />
+                <circle cx="100" cy="100" r="85" fill="none" stroke="#ff1358" strokeWidth="10" opacity="0.08" />
                 <circle
                   cx="100"
                   cy="100"
@@ -413,16 +405,8 @@ export default function Dashboard() {
                   className="transition-all duration-1000 ease-out"
                 />
 
-                {/* Protein Ring (Middle-Outer) */}
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="71"
-                  fill="none"
-                  stroke="#ff9800"
-                  strokeWidth="10"
-                  opacity="0.08"
-                />
+                {/* Protein Ring */}
+                <circle cx="100" cy="100" r="71" fill="none" stroke="#ff9800" strokeWidth="10" opacity="0.08" />
                 <circle
                   cx="100"
                   cy="100"
@@ -437,16 +421,8 @@ export default function Dashboard() {
                   className="transition-all duration-1000 ease-out"
                 />
 
-                {/* Carbs Ring (Middle-Inner) */}
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="57"
-                  fill="none"
-                  stroke="#00e676"
-                  strokeWidth="10"
-                  opacity="0.08"
-                />
+                {/* Carbs Ring */}
+                <circle cx="100" cy="100" r="57" fill="none" stroke="#00e676" strokeWidth="10" opacity="0.08" />
                 <circle
                   cx="100"
                   cy="100"
@@ -461,16 +437,8 @@ export default function Dashboard() {
                   className="transition-all duration-1000 ease-out"
                 />
 
-                {/* Fats Ring (Inner) */}
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="43"
-                  fill="none"
-                  stroke="#b200ff"
-                  strokeWidth="10"
-                  opacity="0.08"
-                />
+                {/* Fats Ring */}
+                <circle cx="100" cy="100" r="43" fill="none" stroke="#b200ff" strokeWidth="10" opacity="0.08" />
                 <circle
                   cx="100"
                   cy="100"
@@ -489,7 +457,6 @@ export default function Dashboard() {
 
             {/* Detailed metrics */}
             <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
-              {/* Calories Row */}
               <div className="flex items-center gap-4 bg-white/[0.01] p-4 rounded-2xl border border-white/5">
                 <div className="w-3.5 h-3.5 rounded-full bg-[#ff1358] shadow-[0_0_10px_rgba(255,19,88,0.4)] shrink-0" />
                 <div>
@@ -497,51 +464,36 @@ export default function Dashboard() {
                   <p className="text-lg font-bold text-white mt-1">
                     {Math.round(caloriesConsumed)} <span className="text-zinc-500 text-sm font-medium">/ {Math.round(calorieTarget)} kcal</span>
                   </p>
-                  <span className="text-[11px] text-zinc-550 font-semibold block mt-0.5">
-                    {Math.round((caloriesConsumed / (calorieTarget || 1)) * 100)}% completed
-                  </span>
                 </div>
               </div>
 
-              {/* Protein Row */}
               <div className="flex items-center gap-4 bg-white/[0.01] p-4 rounded-2xl border border-white/5">
                 <div className="w-3.5 h-3.5 rounded-full bg-[#ff9800] shadow-[0_0_10px_rgba(255,152,0,0.4)] shrink-0" />
                 <div>
-                  <p className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Protein (Build)</p>
+                  <p className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Protein</p>
                   <p className="text-lg font-bold text-white mt-1">
                     {Math.round(proteinConsumed)}g <span className="text-zinc-500 text-sm font-medium">/ {Math.round(proteinTarget)}g</span>
                   </p>
-                  <span className="text-[11px] text-zinc-550 font-semibold block mt-0.5">
-                    {Math.round((proteinConsumed / (proteinTarget || 1)) * 100)}% completed
-                  </span>
                 </div>
               </div>
 
-              {/* Carbs Row */}
               <div className="flex items-center gap-4 bg-white/[0.01] p-4 rounded-2xl border border-white/5">
                 <div className="w-3.5 h-3.5 rounded-full bg-[#00e676] shadow-[0_0_10px_rgba(0,230,118,0.4)] shrink-0" />
                 <div>
-                  <p className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Carbs (Energy)</p>
+                  <p className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Carbs</p>
                   <p className="text-lg font-bold text-white mt-1">
                     {Math.round(carbsConsumed)}g <span className="text-zinc-500 text-sm font-medium">/ {Math.round(carbsTarget)}g</span>
                   </p>
-                  <span className="text-[11px] text-zinc-550 font-semibold block mt-0.5">
-                    {Math.round((carbsConsumed / (carbsTarget || 1)) * 100)}% completed
-                  </span>
                 </div>
               </div>
 
-              {/* Fats Row */}
               <div className="flex items-center gap-4 bg-white/[0.01] p-4 rounded-2xl border border-white/5">
                 <div className="w-3.5 h-3.5 rounded-full bg-[#b200ff] shadow-[0_0_10px_rgba(178,0,255,0.4)] shrink-0" />
                 <div>
-                  <p className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Fats (Healthy)</p>
+                  <p className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Fats</p>
                   <p className="text-lg font-bold text-white mt-1">
                     {Math.round(fatsConsumed)}g <span className="text-zinc-500 text-sm font-medium">/ {Math.round(fatsTarget)}g</span>
                   </p>
-                  <span className="text-[11px] text-zinc-550 font-semibold block mt-0.5">
-                    {Math.round((fatsConsumed / (fatsTarget || 1)) * 100)}% completed
-                  </span>
                 </div>
               </div>
             </div>
@@ -550,18 +502,17 @@ export default function Dashboard() {
 
         {/* BMI Card */}
         <div className="group relative rounded-[2rem] border border-white/5 bg-white/[0.02] p-8 flex flex-col justify-center items-center text-center shadow-2xl backdrop-blur-2xl transition-all hover:border-white/10 hover:bg-white/[0.04] overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.01] to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-          <h3 className="relative z-10 text-zinc-400 text-sm font-medium mb-4 uppercase tracking-wider">Current BMI</h3>
-          <div className="relative z-10 text-6xl font-bold text-white mb-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+          <h3 className="text-zinc-400 text-sm font-medium mb-4 uppercase tracking-wider">Current BMI</h3>
+          <div className="text-6xl font-bold text-white mb-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
             {bmiCurrent}
           </div>
-          <span className="relative z-10 inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white border border-white/10">
+          <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white border border-white/10">
             {bmiCategory}
           </span>
         </div>
       </div>
 
-      {/* Weight Progress & Graph Card */}
+      {/* Goal Progress & Graph Card */}
       {data.goalProgress && (
         <div className="group relative rounded-[2rem] border border-white/5 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-2xl transition-all hover:bg-white/[0.04] hover:border-white/10 overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.01] rounded-full blur-3xl pointer-events-none" />
@@ -572,14 +523,11 @@ export default function Dashboard() {
               <p className="text-sm text-zinc-400 mt-1">Real-time analysis of your weight trends based on your fitness goals.</p>
             </div>
             <div className="flex items-center gap-4 flex-wrap">
-              {/* Timeframe Switcher */}
               <div className="inline-flex rounded-xl bg-white/5 p-1 border border-white/5 shrink-0">
                 <button
                   onClick={() => setWeightTimeframe('weekly')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    weightTimeframe === 'weekly'
-                      ? 'bg-white text-black shadow-lg'
-                      : 'text-zinc-400 hover:text-white'
+                    weightTimeframe === 'weekly' ? 'bg-white text-black shadow-lg' : 'text-zinc-400 hover:text-white'
                   }`}
                 >
                   Weekly
@@ -587,16 +535,13 @@ export default function Dashboard() {
                 <button
                   onClick={() => setWeightTimeframe('monthly')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    weightTimeframe === 'monthly'
-                      ? 'bg-white text-black shadow-lg'
-                      : 'text-zinc-400 hover:text-white'
+                    weightTimeframe === 'monthly' ? 'bg-white text-black shadow-lg' : 'text-zinc-400 hover:text-white'
                   }`}
                 >
                   Monthly
                 </button>
               </div>
 
-              {/* Log Weight Toggle/Form */}
               {showWeightLogger ? (
                 <form onSubmit={handleLogWeight} className="inline-flex items-center gap-1.5 bg-white/5 p-1 rounded-xl border border-white/5">
                   <input
@@ -605,43 +550,25 @@ export default function Dashboard() {
                     placeholder="Weight (kg)"
                     value={newWeight}
                     onChange={(e) => setNewWeight(e.target.value)}
-                    className="w-24 bg-black border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-white"
+                    className="w-24 bg-black border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none"
                     required
                   />
-                  <button
-                    type="submit"
-                    disabled={loggingWeight || !newWeight}
-                    className="px-3 py-1 bg-emerald-500 text-black font-bold text-xs rounded-lg hover:bg-emerald-400 transition-colors disabled:opacity-50 shrink-0 cursor-pointer"
-                  >
-                    {loggingWeight ? "..." : "Log"}
+                  <button type="submit" className="px-3 py-1 bg-emerald-500 text-black font-bold text-xs rounded-lg hover:bg-emerald-400 transition-colors">
+                    Log
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowWeightLogger(false)}
-                    className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/5 text-zinc-300 hover:bg-white/10 transition-colors text-xs font-semibold shrink-0 cursor-pointer"
-                  >
+                  <button type="button" onClick={() => setShowWeightLogger(false)} className="px-2 py-1 rounded-lg bg-white/5 text-zinc-350 text-xs">
                     Cancel
                   </button>
                 </form>
               ) : (
-                <button
-                  onClick={() => setShowWeightLogger(true)}
-                  className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-zinc-300 hover:text-white transition-all text-xs font-semibold cursor-pointer"
-                >
+                <button onClick={() => setShowWeightLogger(true)} className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-zinc-300 hover:text-white text-xs font-semibold cursor-pointer">
                   Log Weight
                 </button>
-              )}
-              
-              {renderAnalysis() && (
-                <span className={`inline-flex items-center rounded-full px-3.5 py-1 text-xs font-bold border transition-all duration-300 ${renderAnalysis().statusColorClass}`}>
-                  {renderAnalysis().statusText}
-                </span>
               )}
             </div>
           </div>
 
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-5 gap-8">
-            {/* Target Tracking & AI Feedback (Left 2 cols) */}
             <div className="lg:col-span-2 space-y-6 flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="flex justify-between text-sm">
@@ -651,128 +578,57 @@ export default function Dashboard() {
                 
                 <div className="relative pt-1">
                   <div className="flex mb-2 items-center justify-between">
-                    <div>
-                      <span className="text-xs font-semibold inline-block py-1 px-2.5 uppercase rounded-full text-white bg-white/10 border border-white/10">
-                        {data.goalProgress.progressPercentage}%
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-xs font-bold text-zinc-350">
-                        {data.goalProgress.currentWeight} kg current
-                      </span>
-                    </div>
+                    <span className="text-xs font-semibold py-1 px-2.5 uppercase rounded-full text-white bg-white/10 border border-white/10">
+                      {data.goalProgress.progressPercentage}%
+                    </span>
+                    <span className="text-xs font-bold text-zinc-350">{data.goalProgress.currentWeight} kg current</span>
                   </div>
-                  <div className="overflow-hidden h-2.5 text-xs flex rounded-full bg-zinc-950/80 border border-white/5 backdrop-blur-sm">
+                  <div className="overflow-hidden h-2.5 text-xs flex rounded-full bg-zinc-950/80 border border-white/5">
                     <div 
                       style={{ width: `${data.goalProgress.progressPercentage}%` }} 
-                      className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-white to-zinc-400 rounded-full transition-all duration-1000 ease-out relative"
-                    >
-                      <div className="absolute top-0 right-0 bottom-0 w-8 bg-white/20 blur-[1px]" />
-                    </div>
+                      className="flex flex-col text-center justify-center bg-gradient-to-r from-white to-zinc-400 rounded-full transition-all duration-1000 ease-out"
+                    />
                   </div>
                 </div>
               </div>
 
-              {/* Progress Analysis Box */}
               {renderAnalysis() && (
-                <div className="bg-white/[0.01] border border-white/5 p-5 rounded-2xl leading-relaxed text-sm text-zinc-300 shadow-inner">
+                <div className="bg-white/[0.01] border border-white/5 p-5 rounded-2xl leading-relaxed text-sm text-zinc-350">
                   <h4 className="font-bold text-white mb-1.5 text-xs uppercase tracking-wider">AI Progress Analysis</h4>
                   <p>{renderAnalysis().feedback}</p>
                 </div>
               )}
             </div>
 
-            {/* SVG Trend Graph (Right 3 cols) */}
             <div className="lg:col-span-3 flex flex-col justify-end">
-              <div className="bg-white/[0.01] rounded-2xl p-5 border border-white/5 shadow-inner relative">
+              <div className="bg-white/[0.01] rounded-2xl p-5 border border-white/5 shadow-inner">
                 {graphPoints.length > 0 ? (
-                  <div>
-                    <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="w-full h-auto overflow-visible">
-                      <defs>
-                        <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="0%" stopColor="#00e5ff" />
-                          <stop offset="100%" stopColor="#00b0ff" />
-                        </linearGradient>
-                        <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#00e5ff" stopOpacity="0.15" />
-                          <stop offset="100%" stopColor="#00e5ff" stopOpacity="0.0" />
-                        </linearGradient>
-                      </defs>
+                  <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="w-full h-auto overflow-visible">
+                    <defs>
+                      <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#00e5ff" />
+                        <stop offset="100%" stopColor="#00b0ff" />
+                      </linearGradient>
+                      <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#00e5ff" stopOpacity="0.15" />
+                        <stop offset="100%" stopColor="#00e5ff" stopOpacity="0.0" />
+                      </linearGradient>
+                    </defs>
 
-                      {/* Horizontal Grid lines */}
-                      {[0.25, 0.5, 0.75].map((ratio, index) => {
-                        const yVal = paddingY + ratio * (svgHeight - 2 * paddingY);
-                        return (
-                          <line 
-                            key={index} 
-                            x1={paddingX} 
-                            y1={yVal} 
-                            x2={svgWidth - paddingX} 
-                            y2={yVal} 
-                            stroke="#ffffff" 
-                            strokeDasharray="4 4" 
-                            strokeWidth="1" 
-                            opacity="0.05"
-                          />
-                        );
-                      })}
+                    {fillD && <path d={fillD} fill="url(#areaGradient)" />}
+                    {pathD && <path d={pathD} stroke="url(#lineGradient)" strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />}
 
-                      {/* Gradient Fill under path */}
-                      {fillD && <path d={fillD} fill="url(#areaGradient)" />}
-
-                      {/* Stroke path line */}
-                      {pathD && (
-                        <path 
-                          d={pathD} 
-                          stroke="url(#lineGradient)" 
-                          strokeWidth="3.5" 
-                          fill="none" 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round" 
-                        />
-                      )}
-
-                      {/* Dots and Labels */}
-                      {points.map((pt, idx) => (
-                        <g key={idx} className="group/dot cursor-pointer">
-                          <circle 
-                            cx={pt.x} 
-                            cy={pt.y} 
-                            r="8" 
-                            fill="#ffffff" 
-                            className="opacity-0 hover:opacity-20 transition-opacity duration-300" 
-                          />
-                          <circle 
-                            cx={pt.x} 
-                            cy={pt.y} 
-                            r="5.5" 
-                            fill="#00e5ff" 
-                            stroke="#000000" 
-                            strokeWidth="2.5" 
-                          />
-                          <text 
-                            x={pt.x} 
-                            y={pt.y - 12} 
-                            textAnchor="middle" 
-                            className="text-[10px] font-bold fill-zinc-200"
-                          >
-                            {pt.weight} kg
-                          </text>
-                          <text 
-                            x={pt.x} 
-                            y={svgHeight - 8} 
-                            textAnchor="middle" 
-                            className="text-[9px] font-medium fill-zinc-500"
-                          >
-                            {pt.date}
-                          </text>
-                        </g>
-                      ))}
-                    </svg>
-                  </div>
+                    {points.map((pt, idx) => (
+                      <g key={idx}>
+                        <circle cx={pt.x} cy={pt.y} r="5.5" fill="#00e5ff" stroke="#000" strokeWidth="2" />
+                        <text x={pt.x} y={pt.y - 12} textAnchor="middle" className="text-[10px] font-bold fill-zinc-200">{pt.weight} kg</text>
+                        <text x={pt.x} y={svgHeight - 8} textAnchor="middle" className="text-[9px] font-medium fill-zinc-550">{pt.date}</text>
+                      </g>
+                    ))}
+                  </svg>
                 ) : (
-                  <div className="h-40 flex flex-col items-center justify-center text-center">
-                    <p className="text-zinc-500 text-sm">Not enough logs to generate a chart yet.</p>
+                  <div className="h-40 flex items-center justify-center text-center text-zinc-500 text-sm">
+                    No weight records logged.
                   </div>
                 )}
               </div>
@@ -781,398 +637,205 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Burn/Intake/Water Summary */}
+      {/* Hydration Water Card */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {/* Calories Consumed */}
-        <div className="rounded-[2rem] border border-white/5 bg-white/[0.02] p-6 flex flex-col justify-between shadow-2xl backdrop-blur-2xl">
+        <div className="rounded-[2rem] border border-white/5 bg-white/[0.02] p-6 flex flex-col justify-between">
           <div>
             <p className="text-zinc-400 text-sm uppercase tracking-wider font-medium">Calories Consumed Today</p>
             <div className="mt-3 text-4xl font-bold text-white">{Math.round(caloriesConsumed)} kcal</div>
           </div>
-          <p className="mt-4 text-zinc-500 text-sm border-t border-white/5 pt-3">Meals logged: {data.todayNutrition?.mealsLogged || 0}</p>
+          <p className="mt-4 text-zinc-500 text-sm border-t border-white/5 pt-3">Target: {calorieTarget} kcal</p>
         </div>
 
-        {/* Interactive Water Intake Card */}
-        <div className="group relative rounded-[2rem] border border-white/5 bg-white/[0.02] p-6 flex flex-col justify-between shadow-2xl backdrop-blur-2xl transition-all hover:border-white/10 hover:bg-white/[0.04] overflow-hidden min-h-[220px]">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.01] rounded-full blur-3xl pointer-events-none" />
-          
-          <div className="relative z-10 flex items-center justify-between border-b border-white/5 pb-2">
+        {/* Interactive Hydration Card */}
+        <div className="rounded-[2rem] border border-white/5 bg-white/[0.02] p-6 flex flex-col justify-between min-h-[220px]">
+          <div className="flex items-center justify-between border-b border-white/5 pb-2">
             <div className="flex items-center gap-2">
-              <GlassWater className="h-5 w-5 text-white animate-pulse shrink-0" />
+              <GlassWater className="h-5 w-5 text-white" />
               <span className="text-zinc-400 text-sm uppercase tracking-wider font-medium">Hydration</span>
             </div>
-            <div className="flex gap-2 shrink-0">
-              <button 
-                onClick={() => {
-                  setTempGoal(data.todayWater?.goal || 2000);
-                  setIsEditingGoal(true);
-                }}
-                className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-zinc-300 hover:text-white transition-all text-xs font-semibold"
-                title="Edit daily goal"
-              >
+            <div className="flex gap-2">
+              <button onClick={() => setIsEditingGoal(true)} className="px-2 py-1 rounded-lg bg-white/5 text-zinc-300 text-xs">
                 Goal: {data.todayWater?.goal || 2000}ml
               </button>
-              <button 
-                onClick={() => setShowWaterHistory(!showWaterHistory)}
-                className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-zinc-300 hover:text-white transition-all text-xs font-semibold"
-                title="View today's history"
-              >
+              <button onClick={() => setShowWaterHistory(!showWaterHistory)} className="px-2 py-1 rounded-lg bg-white/5 text-zinc-300 text-xs">
                 Logs ({data.todayWater?.logs?.length || 0})
               </button>
             </div>
           </div>
 
-          {/* Card Content Area */}
           {isEditingGoal ? (
-            <form onSubmit={handleUpdateWaterGoal} className="relative z-10 flex items-center gap-2 py-4">
+            <form onSubmit={handleUpdateWaterGoal} className="flex items-center gap-2 py-4">
               <input
                 type="number"
                 value={tempGoal}
                 onChange={(e) => setTempGoal(e.target.value)}
-                className="flex-1 rounded-xl border border-white/10 bg-black px-3 py-2 text-xs text-white focus:border-white focus:outline-none"
-                placeholder="Goal (ml)"
-                min="100"
+                className="flex-1 bg-black rounded-xl border border-white/10 px-3 py-1.5 text-xs text-white"
                 required
               />
-              <button 
-                type="submit" 
-                className="px-3 py-2 rounded-xl bg-white text-black hover:bg-zinc-200 transition-colors font-bold text-xs shrink-0"
-              >
-                Save
-              </button>
-              <button 
-                type="button" 
-                onClick={() => setIsEditingGoal(false)}
-                className="px-3 py-2 rounded-xl bg-white/5 border border-white/5 text-zinc-300 hover:bg-white/10 transition-colors font-bold text-xs shrink-0"
-              >
-                Cancel
-              </button>
+              <button type="submit" className="px-3 py-1.5 bg-white text-black font-bold text-xs rounded-xl">Save</button>
+              <button type="button" onClick={() => setIsEditingGoal(false)} className="px-3 py-1.5 bg-white/5 text-zinc-350 text-xs rounded-xl">Cancel</button>
             </form>
           ) : showWaterHistory ? (
-            /* Log history feed */
-            <div className="relative z-10 flex-1 flex flex-col py-3 overflow-y-auto max-h-[140px] scrollbar-thin scrollbar-thumb-zinc-800 pr-1">
+            <div className="flex-1 flex flex-col py-3 overflow-y-auto max-h-[140px] pr-1">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Today's logs</span>
-                <button 
-                  className="text-xs text-white hover:underline animate-pulse"
-                  onClick={() => setShowWaterHistory(false)}
-                >
-                  Back to Tracker
-                </button>
+                <span className="text-[10px] font-bold text-zinc-500 uppercase">Logs</span>
+                <button className="text-xs text-white" onClick={() => setShowWaterHistory(false)}>Back</button>
               </div>
               {data.todayWater?.logs?.length > 0 ? (
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   {data.todayWater.logs.map((log) => (
-                    <div key={log._id} className="flex justify-between items-center bg-white/[0.01] px-3 py-1.5 rounded-xl border border-white/5 hover:border-white/10 transition-all">
-                      <div>
-                        <span className="font-bold text-zinc-200 text-xs">{log.amount} ml</span>
-                        <span className="text-[9px] text-zinc-500 block">
-                          {new Date(log.consumedAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                      <button 
-                        onClick={() => handleDeleteWaterLog(log._id)}
-                        className="text-zinc-550 hover:text-red-400 p-1 rounded transition-colors"
-                        title="Delete log"
-                      >
+                    <div key={log._id} className="flex justify-between items-center bg-white/[0.01] px-3 py-1 rounded-xl border border-white/5">
+                      <span className="text-xs text-zinc-350 font-bold">{log.amount} ml</span>
+                      <button onClick={() => handleDeleteWaterLog(log._id)} className="text-zinc-600 hover:text-red-400">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-4 text-xs text-zinc-500">
-                  No water logged yet today.
-                </div>
+                <p className="text-center py-4 text-xs text-zinc-550">No water logged.</p>
               )}
             </div>
           ) : (
-            /* Interactive visualizer */
-            <div className="relative z-10 flex items-center justify-around py-3">
-              {/* Cup Visualizer */}
-              <div className="water-container hover:scale-105 transition-transform duration-300 shrink-0">
-                {/* Blue filling */}
-                <div 
-                  className="water-wave" 
-                  style={{ height: `${Math.min(100, Math.round(((data.todayWater?.totalIntake || 0) / (data.todayWater?.goal || 2000)) * 100))}%` }}
-                />
-                {/* Centered text display inside cup */}
-                <div className="relative z-20 flex flex-col items-center select-none text-center">
-                  <span className="text-[26px] font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] leading-none">
-                    {Math.round(((data.todayWater?.totalIntake || 0) / (data.todayWater?.goal || 2000)) * 100)}%
-                  </span>
-                  <span className="text-[9px] font-bold text-sky-200 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] uppercase mt-0.5 tracking-wider">
-                    {data.todayWater?.totalIntake || 0}ml
-                  </span>
-                </div>
+            <div className="flex items-center justify-around py-3">
+              <div className="text-center">
+                <span className="text-3xl font-black text-white">{data.todayWater?.totalIntake || 0} ml</span>
+                <span className="block text-xs text-zinc-500 mt-1">Goal: {data.todayWater?.goal || 2000} ml</span>
               </div>
-
-              {/* Quick stats on side of visualizer */}
-              <div className="flex flex-col justify-center">
-                <span className="text-2xl font-black text-white leading-none">
-                  {data.todayWater?.totalIntake || 0} <span className="text-xs font-normal text-zinc-500">ml</span>
-                </span>
-                <span className="text-[11px] text-zinc-400 font-semibold mt-1">
-                  Target: {data.todayWater?.goal || 2000} ml
-                </span>
-                <span className="text-[10px] font-bold text-white mt-0.5">
-                  {Math.max(0, (data.todayWater?.goal || 2000) - (data.todayWater?.totalIntake || 0)) <= 0 
-                    ? "Goal Achieved! 🎉" 
-                    : `${Math.max(0, (data.todayWater?.goal || 2000) - (data.todayWater?.totalIntake || 0))}ml remaining`
-                  }
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Quick Logging Presets / Custom input */}
-          {!isEditingGoal && !showWaterHistory && (
-            <div className="relative z-10 pt-2 border-t border-white/5">
-              <div className="grid grid-cols-3 gap-1.5 mb-2">
-                <button 
-                  onClick={() => handleLogWater(250)}
-                  disabled={loggingWater}
-                  className="py-1 rounded-xl bg-white/5 hover:bg-white border border-white/5 text-zinc-300 hover:text-black font-bold text-[10px] transition-all flex flex-col items-center justify-center cursor-pointer active:scale-95 disabled:opacity-50"
-                >
-                  <span>+250ml</span>
-                </button>
-                <button 
-                  onClick={() => handleLogWater(500)}
-                  disabled={loggingWater}
-                  className="py-1 rounded-xl bg-white/5 hover:bg-white border border-white/5 text-zinc-300 hover:text-black font-bold text-[10px] transition-all flex flex-col items-center justify-center cursor-pointer active:scale-95 disabled:opacity-50"
-                >
-                  <span>+500ml</span>
-                </button>
-                <button 
-                  onClick={() => handleLogWater(1000)}
-                  disabled={loggingWater}
-                  className="py-1 rounded-xl bg-white/5 hover:bg-white border border-white/5 text-zinc-300 hover:text-black font-bold text-[10px] transition-all flex flex-col items-center justify-center cursor-pointer active:scale-95 disabled:opacity-50"
-                >
-                  <span>+1000ml</span>
-                </button>
-              </div>
-
-              {/* Custom ml input */}
-              <div className="flex gap-1.5">
-                <input
-                  type="number"
-                  placeholder="Custom ml..."
-                  value={customAmount}
-                  onChange={(e) => setCustomAmount(e.target.value)}
-                  className="flex-1 min-w-0 bg-black border border-white/10 rounded-xl px-2.5 py-1 text-[11px] text-white focus:outline-none focus:border-white"
-                />
-                <button 
-                  onClick={() => handleLogWater(customAmount)}
-                  disabled={loggingWater || !customAmount}
-                  className="px-3 bg-white text-black font-bold text-[11px] rounded-xl hover:bg-zinc-200 transition-colors disabled:opacity-50 shrink-0"
-                >
-                  Log
-                </button>
+              <div className="grid grid-cols-2 gap-1 shrink-0">
+                <button onClick={() => handleLogWater(250)} className="px-2.5 py-1 rounded-lg bg-white/5 text-zinc-300 text-xs font-bold hover:bg-white hover:text-black transition-colors">+250ml</button>
+                <button onClick={() => handleLogWater(500)} className="px-2.5 py-1 rounded-lg bg-white/5 text-zinc-300 text-xs font-bold hover:bg-white hover:text-black transition-colors">+500ml</button>
               </div>
             </div>
           )}
         </div>
 
-        {/* Calories Burned */}
-        <div className="rounded-[2rem] border border-white/5 bg-white/[0.02] p-6 flex flex-col justify-between shadow-2xl backdrop-blur-2xl">
+        <div className="rounded-[2rem] border border-white/5 bg-white/[0.02] p-6 flex flex-col justify-between">
           <div>
             <p className="text-zinc-400 text-sm uppercase tracking-wider font-medium">Calories Burned Today</p>
             <div className="mt-3 text-4xl font-bold text-white">{Math.round(caloriesBurned)} kcal</div>
           </div>
-          <p className="mt-4 text-zinc-500 text-sm border-t border-white/5 pt-3">Workout logs: {data.todayNutrition?.workoutsLogged || 0}</p>
+          <p className="mt-4 text-zinc-500 text-sm border-t border-white/5 pt-3">Workouts logged: {data.todayNutrition?.workoutsLogged || 0}</p>
         </div>
       </div>
 
-      {/* Today's Plan Grid */}
+      {/* Weekly Charts: Hydration & Calories */}
+      {weeklyData.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Weekly Calorie Intake vs Burn Chart */}
+          <div className="rounded-[2rem] border border-white/5 bg-white/[0.02] p-6 shadow-xl">
+            <h3 className="text-base font-bold text-white mb-4">Weekly Calories Intake vs Burn</h3>
+            <svg viewBox="0 0 500 180" className="w-full h-auto overflow-visible">
+              {/* Daily Bars */}
+              {weeklyData.map((d, i) => {
+                const x = 50 + i * 65;
+                const intakeH = (d.caloriesConsumed / maxCals) * 110;
+                const burnH = (d.caloriesBurned / maxCals) * 110;
+                return (
+                  <g key={i}>
+                    {/* Consumed Bar */}
+                    <rect x={x - 12} y={130 - intakeH} width="10" height={intakeH} fill="#00e676" rx="3" opacity="0.8" />
+                    {/* Burned Bar */}
+                    <rect x={x + 2} y={130 - burnH} width="10" height={burnH} fill="#ff1358" rx="3" opacity="0.8" />
+                    
+                    <text x={x} y="150" textAnchor="middle" className="text-[10px] font-bold fill-zinc-400">{d.day}</text>
+                    <text x={x} y="165" textAnchor="middle" className="text-[8px] fill-zinc-550">{d.date}</text>
+                  </g>
+                );
+              })}
+            </svg>
+            <div className="flex gap-4 justify-center mt-2 text-xs">
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-[#00e676]" /> Consumed</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-[#ff1358]" /> Burned</span>
+            </div>
+          </div>
+
+          {/* Weekly Hydration levels */}
+          <div className="rounded-[2rem] border border-white/5 bg-white/[0.02] p-6 shadow-xl">
+            <h3 className="text-base font-bold text-white mb-4">Weekly Hydration (ml)</h3>
+            <svg viewBox="0 0 500 180" className="w-full h-auto overflow-visible">
+              {weeklyData.map((d, i) => {
+                const x = 50 + i * 65;
+                const waterH = (d.waterIntake / maxWaterVal) * 110;
+                return (
+                  <g key={i}>
+                    <rect x={x - 10} y={130 - waterH} width="20" height={waterH} fill="#00e5ff" rx="4" opacity="0.8" />
+                    <text x={x} y={120 - waterH} textAnchor="middle" className="text-[9px] font-bold fill-zinc-200">{d.waterIntake} ml</text>
+                    <text x={x} y="150" textAnchor="middle" className="text-[10px] font-bold fill-zinc-400">{d.day}</text>
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+        </div>
+      )}
+
+      {/* Recent Workouts and Recent Meals */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Meals List */}
+        {/* Recent Workouts */}
         <div className="group rounded-[2rem] border border-white/5 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-2xl transition-all hover:bg-white/[0.04] hover:border-white/10 overflow-hidden">
           <div className="flex items-center justify-between mb-6 border-b border-white/5 pb-4">
             <div>
-              <h3 className="text-xl font-bold text-white">Today's Meal Plan</h3>
-              <p className="text-sm text-zinc-500 mt-1">You are at this day: {mealDay}</p>
+              <h3 className="text-xl font-bold text-white">Recent Workouts</h3>
+              <p className="text-sm text-zinc-550 mt-1">Your last 5 logged workout sessions.</p>
             </div>
-            <Link to="/meals" className="text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors">
-              View All
+            <Link to="/workouts/history" className="text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors">
+              View History
             </Link>
           </div>
-          <div className="space-y-4">
-            {mealPlanMeals.length > 0 ? (
-              mealPlanMeals.map((meal, index) => (
-                <div key={index} className="group flex items-center justify-between rounded-xl bg-white/[0.01] p-4 border border-white/5 hover:bg-white/[0.02] hover:border-emerald-500/20 transition-all duration-300">
+          <div className="space-y-3">
+            {data.recentWorkouts?.length > 0 ? (
+              data.recentWorkouts.map((workout, index) => (
+                <div key={index} className="flex items-center justify-between rounded-xl bg-white/[0.01] p-4 border border-white/5 hover:border-white/10 transition-all">
                   <div>
-                    <p className="font-semibold text-zinc-200 group-hover:text-emerald-400 transition-colors">{meal.mealName || meal.title || meal.name || `Meal ${index + 1}`}</p>
-                    <p className="text-xs text-zinc-400 mt-1">{meal.mealType || "Meal"} • {meal.protein || 0}g Protein</p>
+                    <p className="font-semibold text-zinc-200">{workout.workoutName}</p>
+                    <p className="text-xs text-zinc-500 mt-0.5">
+                      {workout.workoutType} • {new Date(workout.completedAt || workout.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    </p>
                   </div>
-                  <div className="text-right font-bold text-white bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
-                    {Math.round(meal.calories || 0)} kcal
+                  <div className="text-right text-xs text-zinc-300">
+                    <span className="font-bold text-white block">{workout.duration} min</span>
+                    <span className="text-rose-500">{workout.caloriesBurned} kcal</span>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-center py-8 text-zinc-500">
-                <p>No meals in today's plan.</p>
-                <Link to="/meals/generate" className="text-sm text-emerald-400 hover:underline mt-2 inline-block font-semibold">
-                  Generate AI Meal Plan
-                </Link>
-              </div>
+              <p className="text-zinc-500 text-xs py-4 text-center">No workouts completed yet.</p>
             )}
           </div>
         </div>
 
-        {/* Workout Info Card with Concentric Activity Rings */}
-        <div className="group relative rounded-[2rem] border border-white/5 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-2xl transition-all hover:bg-white/[0.04] hover:border-white/10 overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.01] rounded-full blur-3xl group-hover:bg-white/[0.03] transition-colors pointer-events-none" />
-          
-          <div className="relative z-10 flex items-center justify-between mb-6 border-b border-white/5 pb-4">
-            <h3 className="text-xl font-bold text-white">Workout Rings</h3>
-            {data.todaysWorkout && (
-              <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border bg-white/10 text-white border-white/10">
-                {data.todaysWorkout.isRestDay ? "Rest Day" : "Active Day"}
-              </span>
-            )}
+        {/* Recent Meals */}
+        <div className="group rounded-[2rem] border border-white/5 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-2xl transition-all hover:bg-white/[0.04] hover:border-white/10 overflow-hidden">
+          <div className="flex items-center justify-between mb-6 border-b border-white/5 pb-4">
+            <div>
+              <h3 className="text-xl font-bold text-white">Recent Meals</h3>
+              <p className="text-sm text-zinc-550 mt-1">Your last 5 logged meal entries.</p>
+            </div>
+            <Link to="/meals/history" className="text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors">
+              View History
+            </Link>
           </div>
-
-          <div className="relative z-10 flex flex-col lg:flex-row items-center gap-6 lg:gap-8 py-2">
-            {/* Concentric Rings Visualizer */}
-            <div className="flex justify-center items-center shrink-0">
-              <svg viewBox="0 0 200 200" className="w-36 h-36 md:w-40 md:h-40 overflow-visible drop-shadow-[0_0_20px_rgba(0,0,0,0.5)]">
-                <defs>
-                  <linearGradient id="ringBurnGradient" x1="0" y1="1" x2="0" y2="0">
-                    <stop offset="0%" stopColor="#ff1358" />
-                    <stop offset="100%" stopColor="#ff5b37" />
-                  </linearGradient>
-                  <linearGradient id="ringDurGradient" x1="0" y1="1" x2="0" y2="0">
-                    <stop offset="0%" stopColor="#c1ff3b" />
-                    <stop offset="100%" stopColor="#00e676" />
-                  </linearGradient>
-                  <linearGradient id="ringConstGradient" x1="0" y1="1" x2="0" y2="0">
-                    <stop offset="0%" stopColor="#00e5ff" />
-                    <stop offset="100%" stopColor="#00b0ff" />
-                  </linearGradient>
-                </defs>
-
-                {/* Calories Burned Ring (Outer) */}
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="80"
-                  fill="none"
-                  stroke="#ff1358"
-                  strokeWidth="14"
-                  opacity="0.08"
-                />
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="80"
-                  fill="none"
-                  stroke="url(#ringBurnGradient)"
-                  strokeWidth="14"
-                  strokeDasharray="502.65"
-                  strokeDashoffset={502.65 - (Math.min(caloriesBurned / 300, 1)) * 502.65}
-                  strokeLinecap="round"
-                  transform="rotate(-90 100 100)"
-                  className="transition-all duration-1000 ease-out"
-                />
-
-                {/* Training Duration Ring (Middle) */}
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="62"
-                  fill="none"
-                  stroke="#00e676"
-                  strokeWidth="14"
-                  opacity="0.08"
-                />
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="62"
-                  fill="none"
-                  stroke="url(#ringDurGradient)"
-                  strokeWidth="14"
-                  strokeDasharray="389.56"
-                  strokeDashoffset={389.56 - (Math.min(workoutDuration / 45, 1)) * 389.56}
-                  strokeLinecap="round"
-                  transform="rotate(-90 100 100)"
-                  className="transition-all duration-1000 ease-out"
-                />
-
-                {/* Consistency Ring (Inner) */}
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="44"
-                  fill="none"
-                  stroke="#00e5ff"
-                  strokeWidth="14"
-                  opacity="0.08"
-                />
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="44"
-                  fill="none"
-                  stroke="url(#ringConstGradient)"
-                  strokeWidth="14"
-                  strokeDasharray="276.46"
-                  strokeDashoffset={276.46 - (Math.min((data.workoutConsistency?.percentage || 0) / 100, 1)) * 276.46}
-                  strokeLinecap="round"
-                  transform="rotate(-90 100 100)"
-                  className="transition-all duration-1000 ease-out"
-                />
-              </svg>
-            </div>
-
-            {/* Detailed metrics & actions */}
-            <div className="flex-1 w-full flex flex-col justify-between h-full gap-4">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#ff1358] shadow-[0_0_10px_rgba(255,19,88,0.4)]" />
-                  <span className="text-zinc-400 text-xs font-semibold">Active Burn: <strong className="text-zinc-200">{Math.round(caloriesBurned)} / 300 kcal</strong></span>
+          <div className="space-y-3">
+            {data.recentMeals?.length > 0 ? (
+              data.recentMeals.map((meal, index) => (
+                <div key={index} className="flex items-center justify-between rounded-xl bg-white/[0.01] p-4 border border-white/5 hover:border-white/10 transition-all">
+                  <div>
+                    <p className="font-semibold text-zinc-200">{meal.mealName}</p>
+                    <p className="text-xs text-zinc-500 mt-0.5">
+                      <span className="capitalize">{meal.mealType}</span> • {new Date(meal.consumedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    </p>
+                  </div>
+                  <div className="text-right text-xs text-zinc-350">
+                    <span className="font-bold text-white block">{Math.round(meal.totalCalories)} kcal</span>
+                    <span className="text-emerald-400">{Math.round(meal.totalProtein || 0)}g P • {Math.round(meal.totalCarbs || 0)}g C</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#00e676] shadow-[0_0_10px_rgba(0,230,118,0.4)]" />
-                  <span className="text-zinc-400 text-xs font-semibold">Time: <strong className="text-zinc-200">{Math.round(workoutDuration)} / 45 mins</strong></span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#00e5ff] shadow-[0_0_10px_rgba(0,229,255,0.4)]" />
-                  <span className="text-zinc-400 text-xs font-semibold">Consistency: <strong className="text-zinc-200">{data.workoutConsistency?.completedThisWeek || 0} / {data.workoutConsistency?.totalThisWeek || 0} days</strong></span>
-                </div>
-              </div>
-
-              {data.todaysWorkout ? (
-                <div className="pt-2 border-t border-white/5">
-                  <p className="text-sm font-bold text-white">
-                    Focus: <span className="text-emerald-400">{data.todaysWorkout.isRestDay ? "Rest & Recover" : data.todaysWorkout.focus}</span>
-                  </p>
-                  <p className="text-xs text-zinc-550 mt-1">
-                    {data.todaysWorkout.isRestDay 
-                      ? "Rest is key for muscle recovery." 
-                      : `${data.todaysWorkout.exercises?.length || 0} custom movements planned.`}
-                  </p>
-
-                  {!data.todaysWorkout.isRestDay && (
-                    <Link to="/workouts" className="block mt-4">
-                      <button className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded-xl text-xs font-bold transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-                        Start Workout
-                      </button>
-                    </Link>
-                  )}
-                </div>
-              ) : (
-                <div className="pt-2 border-t border-white/5 text-left">
-                  <p className="text-xs text-zinc-500 font-medium">No workout plan loaded for today.</p>
-                  <Link to="/workouts/generate" className="block mt-3">
-                    <button className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded-xl text-xs font-bold transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-                      Generate AI Plan
-                    </button>
-                  </Link>
-                </div>
-              )}
-            </div>
+              ))
+            ) : (
+              <p className="text-zinc-500 text-xs py-4 text-center">No meals logged yet.</p>
+            )}
           </div>
         </div>
       </div>
