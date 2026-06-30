@@ -691,7 +691,13 @@ export default function Dashboard() {
                 <div className="space-y-4">
                   <div className="flex justify-between text-xs">
                     <span className="text-zinc-400">Type / Style: <strong className="text-zinc-200 capitalize">{mealToRender.dietPreference}</strong></span>
-                    <span className="text-zinc-400">Target: <strong className="text-zinc-200">{mealToRender.dailyCalorieTarget} kcal</strong></span>
+                    <span className="text-zinc-400">
+                      Target: <strong className="text-zinc-200">
+                        {mealToRender.meals?.length > 0 
+                          ? mealToRender.meals.reduce((sum, m) => sum + (Number(m.calories) || 0), 0)
+                          : mealToRender.dailyCalorieTarget || 2000} kcal
+                      </strong>
+                    </span>
                   </div>
 
                   <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1">

@@ -222,7 +222,7 @@ export default function WorkoutHistory() {
       </div>
 
       {/* Statistics Row */}
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="rounded-2xl border border-white/5 bg-white/[0.01] p-6 text-center backdrop-blur-sm">
           <span className="text-zinc-500 text-xs uppercase tracking-wider block">Sessions Logged</span>
           <span className="text-3xl font-black text-white block mt-1">{totalWorkouts}</span>

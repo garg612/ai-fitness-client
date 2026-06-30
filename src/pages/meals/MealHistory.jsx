@@ -237,7 +237,7 @@ export default function MealHistory() {
       </div>
 
       {/* Statistics Row */}
-      <div className="grid grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="rounded-2xl border border-white/5 bg-white/[0.01] p-6 text-center backdrop-blur-sm">
           <span className="text-zinc-550 text-xs uppercase tracking-wider block">Avg. Calories</span>
           <span className="text-2xl font-black text-white block mt-1">{avgCals} <span className="text-xs font-normal">kcal</span></span>
